@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Tic Tac Woah</string>
+    <string name="single_play_txt">Single Player Mode</string>
+    <string name="bluetooth_txt">Bluetooth Mode</string>
+</resources>
