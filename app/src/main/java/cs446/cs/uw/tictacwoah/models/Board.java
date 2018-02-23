@@ -4,8 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Board {
+    // 3 * 3 Board
+    public static final Integer boardSize = 3;
+
     private Integer numPlayers;
-    private List<Object> objectPos;
+
+    // first dimension indicates size of piece
+    // second dimension indicates row index
+    // third dimension indicates column index
+    private Piece pieces[][][];
+
     private boolean gameover;
     private Integer winPlayer;
 
@@ -18,35 +26,30 @@ public class Board {
         this.numPlayers = numPlayers;
     }
 
-    public List<Object> getObjectPos() {
-        return objectPos;
-    }
-
-    public void setObjectPos(Object objectPos) {
-        this.objectPos.add(objectPos);
-    }
+    public Piece[][][] getPieces() { return pieces; }
 
     public boolean isGameover() {
         return gameover;
-    }
-
-    public void setGameover(boolean gameover) {
-        this.gameover = gameover;
     }
 
     public Integer getWinPlayer() {
         return winPlayer;
     }
 
-    public void setWinPlayer(Integer winPlayer) {
-        this.winPlayer = winPlayer;
+    // This function returns false if the desired position has been occupied,
+    // returns true if the placement is successful
+    public boolean placePiece(Piece piece, Integer pieceSize, Integer i, Integer j){
+        if (pieces[pieceSize][i][j] != null) return false;
+        pieces[pieceSize][i][j] = piece;
+        // check if piece.playerId just won here
+        return true;
     }
 
     // constructor
-    public Board(Integer num) {
-        this.numPlayers = num;
+    public Board(Integer numPlayers) {
+        this.numPlayers = numPlayers;
         this.gameover = false;
         this.winPlayer = 0;
-        this.objectPos = new ArrayList<>();
+        this.pieces = new Piece[Piece.numSizes][boardSize][boardSize];
     }
 }
