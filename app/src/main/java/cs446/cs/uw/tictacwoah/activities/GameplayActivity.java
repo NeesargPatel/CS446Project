@@ -4,7 +4,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cs446.cs.uw.tictacwoah.R;
+import cs446.cs.uw.tictacwoah.models.Board;
+import cs446.cs.uw.tictacwoah.models.Player;
 
 public class GameplayActivity extends AppCompatActivity {
 
@@ -20,5 +25,19 @@ public class GameplayActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         );
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Integer gameMode = getIntent().getIntExtra("gameMode", 0);
+
+        // get number of players here from Home?
+        Integer numPlayers;
+        List<Player> players = new ArrayList<>();
+        for (int i=0; i<numPlayers; i++)
+            players.add(new Player(i));
+        Board board = new Board(numPlayers);
+        board.setCurrPlayer(0);
     }
 }

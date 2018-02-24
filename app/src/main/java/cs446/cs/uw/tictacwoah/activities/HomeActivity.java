@@ -30,13 +30,13 @@ public class HomeActivity extends AppCompatActivity {
 
     public void onSingleBtn(View view) {
         Intent singlePlayer = new Intent(this, GameplayActivity.class);
-
+        singlePlayer.putExtra("gameMode", 0);
         startActivity(singlePlayer);
     }
 
     public void onBlueBtn(View view) {
         Intent bluetooth = new Intent(this, LobbyActivity.class);
-
+        bluetooth.putExtra("gameMode", 1);
         startActivity(bluetooth);
     }
 }

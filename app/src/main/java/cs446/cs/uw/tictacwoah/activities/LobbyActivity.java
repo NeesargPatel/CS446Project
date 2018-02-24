@@ -21,4 +21,11 @@ public class LobbyActivity extends AppCompatActivity {
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         );
     }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Integer gameMode = getIntent().getIntExtra("gameMode", 1);
+        
+    }
 }

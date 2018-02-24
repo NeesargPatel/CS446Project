@@ -22,4 +22,17 @@ public class Player {
         availablePieces = new ArrayList<>();
         for (int i = 0; i < Piece.numSizes; ++i) availablePieces.add(maxPieces);
     }
+
+    // get number of pieces remaining for a size for a player
+    public Integer piecesRemaining(Integer pieceSize) {
+        return this.availablePieces.get(pieceSize);
+    }
+
+    // player has added a piece to board and has one less piece
+    public boolean removePiece(Integer pieceSize) {
+        Integer pieces = this.availablePieces.get(pieceSize);
+        if (pieces > 0)
+            this.availablePieces.set(pieceSize, pieces-1);
+        return true;
+    }
 }
