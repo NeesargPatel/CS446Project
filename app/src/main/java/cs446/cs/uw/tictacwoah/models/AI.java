@@ -18,7 +18,7 @@ public class AI extends Player {
     }
 
     // randomly select a piece of certain size to move to a location in board and return Integer[size, row, column]
-    public Integer[] setPiece() {
+    /*public Integer[] setPiece() {
 
-    }
+    }*/
 }
