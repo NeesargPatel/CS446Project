@@ -1,23 +1,13 @@
 package cs446.cs.uw.tictacwoah.activities;
 
-import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Layout;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -29,7 +19,6 @@ import java.util.Observer;
 
 import cs446.cs.uw.tictacwoah.R;
 import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
-import cs446.cs.uw.tictacwoah.models.BluetoothService;
 import cs446.cs.uw.tictacwoah.models.Piece;
 
 import static cs446.cs.uw.tictacwoah.R.id.board;
@@ -40,17 +29,16 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     private RelativeLayout rootLayout;
     private BoardView boardView;
+
     private Drawable[] drawables;
     private int[] pieceSizes;
+    float widthOfSquare;
 
     private List<View> boardPieces;  // clear these views for a new game
 
-    float dX;
-    float dY;
-    int lastAction;
-    float widthOfSquare;
-    float origX = 0;
-    float origY = 0;
+    // for dragging pieces
+    private int lastAction;
+    private float origX, origY, dX, dY;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,8 +60,8 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         boardView = findViewById(board);
 
         drawables = new Drawable[model.getNumPlayers()];
-        drawables[0] = getResources().getDrawable(R.drawable.l_square);
-        drawables[1] = getResources().getDrawable(R.drawable.l_squareo);
+        drawables[0] = getResources().getDrawable(R.drawable.square_blue);
+        drawables[1] = getResources().getDrawable(R.drawable.sqaure_green);
 
         // I don't know why I can't use array initialization here
         pieceSizes = new int[3];
@@ -86,14 +74,12 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         widthOfSquare = displayMetrics.widthPixels / 3;
 
         float heightOfScreen = displayMetrics.heightPixels;
-
         createDraggablePieces(heightOfScreen);
 
         boardPieces = new LinkedList<>();
     }
 
-    public void createDraggablePieces(float heightOfScreen){
-
+    private void createDraggablePieces(float heightOfScreen){
         // For each size, I create 2 pieces,
         // so when user drags a piece, there will still be another piece on the UI
         for (int j = 0; j < 2; ++j) {
@@ -182,11 +168,11 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         }
     }
 
-    public float getCenterXCoordinate (View view) {
+    private float getCenterXCoordinate (View view) {
         return view.getX() + view.getWidth()  / 2;
     }
 
-    public float getCenterYCoordinate (View view) {
+    private float getCenterYCoordinate (View view) {
         return view.getY() + view.getHeight()  / 2;
     }
 
@@ -204,13 +190,32 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         return super.onOptionsItemSelected(item);
     }
 
+        @Override
+    public void onDestroy() {
+        super.onDestroy();
+        model.closeBltConn();
+    }
+
     private void newGame() {
         boardView.invalidate();
     }
 
-    private void drawPieceOnBoard(Piece piece){
+    @Override
+    public void update(Observable observable, Object object) {
+
+        Piece piece = model.getLastPlacedPiece();
+        drawPieceOnBoard(piece, drawables[piece.getId()]);
+
+        // check if game is over and show the winning pattern
+        if (model.isGameOver()){
+            drawWinningPattern(model.getWinningPattern());
+            showWinOrLoseMessage(model.getWinningPattern()[0].getId());
+        }
+    }
+
+    private void drawPieceOnBoard(Piece piece, Drawable drawable){
         ImageView imageView = new ImageView(this);
-        imageView.setImageDrawable(drawables[piece.getId()]);
+        imageView.setImageDrawable(drawable);
 
         int sizeId = piece.getSize();
         float offset = (widthOfSquare - pieceSizes[sizeId]) / 2;
@@ -225,10 +230,17 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         boardPieces.add(imageView);
     }
 
-    @Override
-    public void update(Observable observable, Object object) {
-        drawPieceOnBoard(model.getLastPlacedPiece());
-        // check if game is over and show the winning pattern
+    private void drawWinningPattern(Piece[] pieces){
+        // use a different color to emphasize the winning pattern
+        Drawable drawable = getResources().getDrawable(R.drawable.square_red);
+        for (int i = 0; i < pieces.length; ++i){
+            drawPieceOnBoard(pieces[i], drawable);
+        }
+    }
+
+    public void showWinOrLoseMessage(Integer winnerId){
+        String msg = (winnerId.equals(model.getMyPlayerId())) ? "You win" : "You lose";
+        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
 //    private BoardView boardView;
@@ -505,7 +517,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 //
 //        RelativeLayout layout = findViewById(R.id.thisisalayout);
 //        ImageView imageView = new ImageView(this);
-//        imageView.setImageResource(R.drawable.l_squareo);
+//        imageView.setImageResource(R.drawable.sqaure_green);
 //        imageView.setX(left);
 //        imageView.setY(top);
 //        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams((int) pieceSize, (int) pieceSize);

@@ -78,8 +78,8 @@ public class GamePlayModel extends Observable {
             BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
 
             bluetoothService = new BluetoothService(context, handler);
-            bluetoothService.connect(device, false);  // false stands for insecure
-            bluetoothService.start();
+            if (isHost) bluetoothService.start();  // start accept threads in bluetoothService
+            else bluetoothService.connect(device, false);  // false stands for insecure
         }
         else{
             bluetoothService = null;
@@ -88,11 +88,23 @@ public class GamePlayModel extends Observable {
     }
 
     public Integer getMyPlayerId() { return myPlayerId; }
-
     public Integer getNumPlayers() { return numPlayers; }
+    public Boolean isMyTurn(){
+        return myPlayerId.equals(curPlayer);
+    }
+    public Boolean isGameOver() { return board.isGameOver(); }
+    public Piece[] getWinningPattern() { return board.getWinningPattern(); }
+    public Piece getLastPlacedPiece() { return board.getLastPlacedPiece(); }
 
-    public void nextPlayer(){
-        curPlayer = (curPlayer + 1) % numPlayers;
+    public void closeBltConn(){
+        if (bluetoothService != null) {
+            bluetoothService.stop();
+        }
+    }
+
+    public void setChangedAndNotify(){
+        setChanged();
+        notifyObservers();
     }
 
     public Boolean placePiece(Piece piece){
@@ -121,31 +133,17 @@ public class GamePlayModel extends Observable {
         }
     }
 
-    public void AIPlacePieces(){
+    private void nextPlayer(){
+        curPlayer = (curPlayer + 1) % numPlayers;
+    }
+
+    private void AIPlacePieces(){
         // while it's not the turn of human player and nobody has won
-        while (!curPlayer.equals(myPlayerId) && !board.isGameover()){
+        while (!curPlayer.equals(myPlayerId) && !board.isGameOver()){
             placePiece(AI.choosePos(board, curPlayer));
             setChangedAndNotify();
         }
     }
 
-    public Boolean isMyTurn(){
-        return myPlayerId.equals(curPlayer);
-    }
-    public Piece getLastPlacedPiece() { return board.getLastPlacedPiece(); }
 
-//    public Piece[] getWinningPattern(){
-//
-//    }
-
-    public void closeBltConn(){
-        if (bluetoothService != null) {
-            bluetoothService.stop();
-        }
-    }
-
-    public void setChangedAndNotify(){
-        setChanged();
-        notifyObservers();
-    }
 }
