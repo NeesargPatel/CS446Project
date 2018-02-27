@@ -198,6 +198,12 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     }
 
     @Override
+    protected void onResume(){
+
+        super.onResume();
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
         return super.onCreateOptionsMenu(menu);

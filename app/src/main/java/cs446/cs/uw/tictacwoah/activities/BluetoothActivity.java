@@ -46,7 +46,12 @@ public class BluetoothActivity extends AppCompatActivity {
         // assume that this device has blue tooth functionality,
         // so bluetoothAdapter won't be null
         if (bluetoothAdapter.isEnabled()){
-            Intent intent = new Intent(this, LobbyActivity.class);
+            Intent intent;
+            if (view.getId() == R.id.join_button){
+                intent = new Intent(this, LobbyActivity.class);
+            }
+            else intent = new Intent(this, GamePlayActivity.class);
+
             intent.putExtra(GamePlayModel.HOST_KEY, isHost);  // creator of room is host
             startActivity(intent);
         }

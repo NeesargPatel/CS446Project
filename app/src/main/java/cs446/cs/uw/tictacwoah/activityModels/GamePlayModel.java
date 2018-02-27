@@ -31,6 +31,8 @@ public class GamePlayModel extends Observable {
 
     private final String gameMode;
     private final Integer myPlayerId;
+    private Boolean isHost;
+    private String hostAddress;
 
     private Integer numPlayers;
     private Integer curPlayer;
@@ -64,21 +66,16 @@ public class GamePlayModel extends Observable {
 
         gameMode = bundle.getString(GAME_MODE_KEY);
         if (gameMode.equals(MULTIPLAYER_MODE)){
-            Boolean isHost = bundle.getBoolean(HOST_KEY);
+            isHost = bundle.getBoolean(HOST_KEY);
             // Because we only support 2 players now
             // assign 0 to host, 1 if not
             myPlayerId = isHost ? 0 : 1;
 
-            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            String address = bundle.getString(LobbyActivity.EXTRA_DEVICE_ADDRESS);
+            if (!isHost){
+                hostAddress = bundle.getString(LobbyActivity.EXTRA_DEVICE_ADDRESS);
+            }
 
-            // The user should enable blue tooth in BluetoothActivity,
-            // so I do not check if bluetooth is enabled here
-            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(address);
-
-            bluetoothService = new BluetoothService(context, handler);
-            if (isHost) bluetoothService.start();  // start accept threads in bluetoothService
-            else bluetoothService.connect(device, false);  // false stands for insecure
+            establishBltConn(context);
         }
         else{
             bluetoothService = null;
@@ -94,6 +91,19 @@ public class GamePlayModel extends Observable {
     public Boolean isGameOver() { return board.isGameOver(); }
     public Piece[] getWinningPattern() { return board.getWinningPattern(); }
     public Piece getLastPlacedPiece() { return board.getLastPlacedPiece(); }
+
+    // This function should be called when GamePlayActivity is opened again
+    public void establishBltConn(Context context){
+        bluetoothService = new BluetoothService(context, handler);
+        if (isHost) bluetoothService.start();  // start accept threads in bluetoothService
+        else {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            // The user should enable blue tooth in BluetoothActivity,
+            // so I do not check if bluetooth is enabled here
+            BluetoothDevice device = bluetoothAdapter.getRemoteDevice(hostAddress);
+            bluetoothService.connect(device, false);  // false stands for insecure
+        }
+    }
 
     public void closeBltConn(){
         if (bluetoothService != null) {
