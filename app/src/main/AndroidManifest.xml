@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="cs446.cs.uw.tictacwoah">
 
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -20,15 +23,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.GameplayActivity"
+            android:name=".activities.GamePlayActivity"
             android:label="@string/title_activity_gameplay"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".activities.LobbyActivity" />
         <activity android:name=".activities.SinglePlayerActivity" />
+        <activity android:name=".activities.BluetoothActivity"></activity>
     </application>
-
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-    <uses-permission android:name="android.permission.BLUETOOTH" />
 
 </manifest>

@@ -36,6 +36,7 @@ import android.widget.TextView;
 import java.util.Set;
 
 import cs446.cs.uw.tictacwoah.R;
+import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
 
 /**
  * This Activity appears as a dialog. It lists any paired devices and
@@ -187,8 +188,10 @@ public class LobbyActivity extends Activity {
 
             // Create the result Intent and include the MAC address
 
-            Intent intent = new Intent(getApplicationContext(), GameplayActivity.class);
+            Intent intent = new Intent(getApplicationContext(), GamePlayActivity.class);
             intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
+            intent.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.MULTIPLAYER_MODE);
+            intent.putExtra(GamePlayModel.HOST_KEY, getIntent().getExtras().getBoolean(GamePlayModel.HOST_KEY));
             startActivity(intent);
             // Set result and finish this Activity
             setResult(Activity.RESULT_OK, intent);

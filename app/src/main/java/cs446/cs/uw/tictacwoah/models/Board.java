@@ -1,101 +1,220 @@
 package cs446.cs.uw.tictacwoah.models;
 
-import java.util.Random;
+import android.util.Log;
 
 public class Board {
+    // 3 * 3 Board
+    public static final Integer boardSize = 3;
 
-    private static final Random RANDOM = new Random();
-    private char[] elts;
-    private char currentPlayer;
-    private boolean ended;
+    // first dimension indicates size of piece
+    // second dimension indicates row index
+    // third dimension indicates column index
+    private Piece pieces[][][];
 
+    private Integer currPlayer;
+    private boolean gameover;
+    private Integer winPlayer;
+
+    // 1 - all three sized shapes on same position
+    // 2 - three same sized shapes horizontal or vertical
+    // 3 - three shapes of ascending or descending order of size horizontally or vertically
+    private Integer typeOfWin;
+
+    private Piece lastPlacedPiece;
+
+    // constructor
     public Board() {
-        elts = new char[9];
-        newGame();
+        this.gameover = false;
+        this.winPlayer = 0;
+        this.typeOfWin = new Integer(0);
+        this.pieces = new Piece[Piece.NUM_SIZES][boardSize][boardSize];
+        this.lastPlacedPiece = null;
     }
 
-    public boolean isEnded() {
-        return ended;
+    public Piece[][][] getPieces() { return pieces; }
+
+    public boolean isGameover() {
+        return gameover;
     }
 
-    public char play(int x, int y) {
-        if (!ended  &&  elts[3 * y + x] == ' ') {
-            elts[3 * y + x] = currentPlayer;
-            changePlayer();
-        }
-
-        return checkEnd();
+    public Integer getWinPlayer() {
+        return winPlayer;
     }
 
-    public void changePlayer() {
-        currentPlayer = (currentPlayer == 'X' ? 'O' : 'X');
+    public Integer getCurrPlayer() {
+        return currPlayer;
     }
 
-    public char getElt(int x, int y) {
-        return elts[3 * y + x];
+    public void setCurrPlayer(Integer currPlayer) {
+        this.currPlayer = currPlayer;
     }
 
-    public void newGame() {
-        for (int i = 0; i  < elts.length; i++) {
-            elts[i] = ' ';
-        }
-
-        currentPlayer = 'X';
-        ended = false;
-    }
-
-    public char checkEnd() {
-        for (int i = 0; i < 3; i++) {
-            if (getElt(i, 0) != ' ' &&
-                    getElt(i, 0) == getElt(i, 1)  &&
-                    getElt(i, 1) == getElt(i, 2)) {
-                ended = true;
-                return getElt(i, 0);
-            }
-
-            if (getElt(0, i) != ' ' &&
-                    getElt(0, i) == getElt(1, i)  &&
-                    getElt(1, i) == getElt(2, i)) {
-                ended = true;
-                return getElt(0, i);
+    // for AI to generate random number
+    public Integer getNumEmptyCells(){
+        Integer emptyCells = 0;
+        for (int i = 0; i < pieces.length; ++i){
+            for (int j = 0; j < pieces[i].length; ++j){
+                for (int k = 0; k < pieces[i][j].length; ++k){
+                    if (pieces[i][j][k] == null) ++emptyCells;
+                    else Log.d("Board", pieces[i][j][k].getId().toString());
+                }
             }
         }
-
-        if (getElt(0, 0) != ' '  &&
-                getElt(0, 0) == getElt(1, 1)  &&
-                getElt(1, 1) == getElt(2, 2)) {
-            ended = true;
-            return getElt(0, 0);
-        }
-
-        if (getElt(2, 0) != ' '  &&
-                getElt(2, 0) == getElt(1, 1)  &&
-                getElt(1, 1) == getElt(0, 2)) {
-            ended = true;
-            return getElt(2, 0);
-        }
-
-        for (int i = 0; i < 9; i++) {
-            if (elts[i] == ' ')
-                return ' ';
-        }
-
-        return 'T';
+        return emptyCells;
     }
 
-    public char computer() {
-        if (!ended) {
-            int position = -1;
+    // This function returns false if the desired position has been occupied,
+    // returns true if the placement is successful
+    public boolean placePiece(Piece piece){
+        Integer pieceSize = piece.getSize(), i = piece.getRowId(), j = piece.getColId();
 
-            do {
-                position = RANDOM.nextInt(9);
-            } while (elts[position] != ' ');
+        if (this.pieces[pieceSize][i][j] != null) return false;
 
-            elts[position] = currentPlayer;
-            changePlayer();
+        this.pieces[pieceSize][i][j] = piece;
+        lastPlacedPiece = piece;
+
+        if (checkWon(piece, pieceSize, i, j)) {
+            this.gameover = true;
+            this.winPlayer = piece.getId();
         }
 
-        return checkEnd();
+        return true;
     }
 
+    public Boolean isGameOver(){
+        return gameover;
+    }
+
+    public Piece getLastPlacedPiece(){
+        return lastPlacedPiece;
+    }
+
+    // First way to win is different sized pieces in same position
+    private boolean firstWayToWin(Piece piece, Integer i, Integer j) {
+        for (int x = 0; x< Board.boardSize; x++) {
+            if (pieces[x][i][j] != piece)
+                return false;
+        }
+        return true;
+    }
+
+    // Second way to win is same sized pieces horizontally, vertically or diagonally
+    private boolean secondWayToWin(Piece piece, Integer pieceSize, Integer i, Integer j) {
+        // Horizontal
+        boolean win = true;
+        for (int x = 0; x< Board.boardSize; x++) {
+            if (pieces[pieceSize][i][x] != piece) {
+                win = false;
+                break;
+            }
+        }
+        if (win) return true;
+
+        // Vertical
+        win = true;
+        for (int x = 0; x< Board.boardSize; x++) {
+            if (pieces[pieceSize][x][j] != piece) {
+                win = false;
+                break;
+            }
+        }
+        if (win) return true;
+
+        // left-to-right diagonal
+        if (i == j) {
+            win = true;
+            for (int x = 0; x < Board.boardSize; x++) {
+                if (pieces[pieceSize][x][x] != piece) {
+                    win = false;
+                    break;
+                }
+            }
+            if (win) return true;
+        }
+
+        // right-to-left diagonal
+        if (j == Board.boardSize-i-1 || i == Board.boardSize-j-1) {
+            win = true;
+            for (int x = 0; x < Board.boardSize; x++) {
+                if (pieces[pieceSize][x][Board.boardSize-x-1] != piece) {
+                    win = false;
+                    break;
+                }
+            }
+            if (win) return true;
+        }
+
+        return false;
+    }
+
+    // Third way to win is different sized pieces in ascending or descending order horizontally, vertically or diagonally
+    private boolean thirdWayToWin(Piece piece, Integer i, Integer j) {
+        // Horizontal
+        boolean win = true, winRev = true;
+        for (int x = 0; x< Board.boardSize; x++) {
+            if (pieces[x][i][x] != piece) {
+                win = false;
+            }
+            if (pieces[Board.boardSize-x-1][i][x] != piece) {
+                winRev = false;
+            }
+        }
+        if (win || winRev) return true;
+
+        // Vertical
+        win = winRev = true;
+        for (int x = 0; x< Board.boardSize; x++) {
+            if (pieces[x][x][j] != piece) {
+                win = false;
+            }
+            if (pieces[Board.boardSize-x-1][x][j] != piece) {
+                winRev = false;
+            }
+        }
+        if (win || winRev) return true;
+
+        // left-to-right diagonal
+        if (i == j) {
+            win = winRev = true;
+            for (int x = 0; x < Board.boardSize; x++) {
+                if (pieces[x][x][x] != piece) {
+                    win = false;
+                }
+                if (pieces[Board.boardSize-x-1][x][x] != piece) {
+                    winRev = false;
+                }
+            }
+            if (win || winRev) return true;
+        }
+
+        // right-to-left diagonal
+        if (j == Board.boardSize-i-1 || i == Board.boardSize-j-1) {
+            win = winRev = true;
+            for (int x = 0; x < Board.boardSize; x++) {
+                if (pieces[x][x][Board.boardSize-x-1] != piece) {
+                    win = false;
+                }
+                if (pieces[Board.boardSize-x-1][x][Board.boardSize-x-1] != piece) {
+                    winRev = false;
+                }
+            }
+            if (win || winRev) return true;
+        }
+
+        return false;
+    }
+
+    // Check if a player has won after they have played
+    private boolean checkWon(Piece piece, Integer pieceSize, Integer i, Integer j) {
+        if (firstWayToWin(piece, i, j))
+            typeOfWin = 1;
+        else if(secondWayToWin(piece, pieceSize, i, j))
+            typeOfWin = 2;
+        else if(thirdWayToWin(piece, i, j))
+            typeOfWin = 3;
+
+        if (typeOfWin > 0)
+            return true;
+        return false;
+    }
 }

@@ -1,4 +1,4 @@
-package cs446.cs.uw.tictacwoah.activities;
+package cs446.cs.uw.tictacwoah.models;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;

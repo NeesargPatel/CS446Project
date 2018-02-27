@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="cs446.cs.uw.tictacwoah.activities.GameplayActivity"
+    tools:context="cs446.cs.uw.tictacwoah.activities.GamePlayActivity"
     tools:showIn="@layout/activity_gameplay">
 
 </android.support.constraint.ConstraintLayout>

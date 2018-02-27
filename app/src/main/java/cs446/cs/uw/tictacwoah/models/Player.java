@@ -20,7 +20,7 @@ public class Player {
     public Player(Integer id) {
         this.id = id;
         availablePieces = new ArrayList<>();
-        for (int i = 0; i < Piece.numSizes; ++i) availablePieces.add(maxPieces);
+        for (int i = 0; i < Piece.NUM_SIZES; ++i) availablePieces.add(maxPieces);
     }
 
     // get number of pieces remaining for a size for a player
