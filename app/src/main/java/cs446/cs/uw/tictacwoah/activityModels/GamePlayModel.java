@@ -114,9 +114,19 @@ public class GamePlayModel extends Observable {
     public Boolean placePiece(Piece piece){
         if (!board.placePiece(piece)) return false;
         else {
-            // if this piece was placed at a valid position,
-            // then move to the next player
-            nextPlayer();
+            // update UI
+            // 1. draw this new piece and
+            // 2. maybe show the winning pattern if somebody just won)
+            setChangedAndNotify();
+
+            if (board.isGameOver()){
+                curPlayer = -1;  // nobody can place pieces onto the board until the game restarts
+            }
+            else {
+                // if this piece was placed at a valid position,
+                // then move to the next player
+                nextPlayer();
+            }
 
             // If this newly placed piece was placed by myself
             if (piece.getId().equals(myPlayerId)){
@@ -125,13 +135,9 @@ public class GamePlayModel extends Observable {
                     bluetoothService.write(piece.toByteArray());
                 }
                 else {  // single player mode
-                    setChangedAndNotify();  // let UI draw this piece first
                     AIPlacePieces();
                 }
             }
-
-            // update UI (place a new piece and maybe show the winning pattern if somebody just won)
-            setChangedAndNotify();
 
             return true;
         }
