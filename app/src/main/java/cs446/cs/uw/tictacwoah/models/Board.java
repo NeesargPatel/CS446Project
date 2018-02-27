@@ -32,7 +32,7 @@ public class Board {
         reset();
     }
 
-    private void reset(){
+    public void reset(){
         this.pieces = new Piece[Piece.NUM_SIZES][boardSize][boardSize];
         this.lastPlacedPiece = null;
         this.winningPattern = null;

@@ -1,5 +1,7 @@
 package cs446.cs.uw.tictacwoah.activities;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -29,6 +32,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     private RelativeLayout rootLayout;
     private BoardView boardView;
+    private Button restartButton;
 
     private Drawable[] drawables;
     private int[] pieceSizes;
@@ -57,7 +61,15 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         model.addObserver(this);
 
         rootLayout = findViewById(R.id.thisisalayout);
-        boardView = findViewById(board);
+        boardView = findViewById(R.id.board);
+        restartButton = findViewById(R.id.restart_button);
+
+        restartButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                newGame();
+            }
+        });
 
         drawables = new Drawable[model.getNumPlayers()];
         drawables[0] = getResources().getDrawable(R.drawable.square_blue);
@@ -197,7 +209,10 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     }
 
     private void newGame() {
+        restartButton.setVisibility(View.GONE);
         boardView.invalidate();
+        for (View v: boardPieces) rootLayout.removeView(v);
+        model.reset();
     }
 
     @Override
@@ -210,6 +225,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         if (model.isGameOver()){
             drawWinningPattern(model.getWinningPattern());
             showWinOrLoseMessage(model.getWinningPattern()[0].getId());
+            restartButton.setVisibility(View.VISIBLE);
         }
     }
 
@@ -239,7 +255,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     }
 
     public void showWinOrLoseMessage(Integer winnerId){
-        String msg = (winnerId.equals(model.getMyPlayerId())) ? "You win" : "You lose";
+        String msg = (winnerId.equals(model.getMyPlayerId())) ? "You win. " : "You lose. ";
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 

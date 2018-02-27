@@ -14,7 +14,6 @@ import cs446.cs.uw.tictacwoah.activities.LobbyActivity;
 import cs446.cs.uw.tictacwoah.models.AI;
 import cs446.cs.uw.tictacwoah.models.BluetoothService;
 import cs446.cs.uw.tictacwoah.models.Board;
-import cs446.cs.uw.tictacwoah.models.NewBoard;
 import cs446.cs.uw.tictacwoah.models.Piece;
 
 /**
@@ -31,9 +30,9 @@ public class GamePlayModel extends Observable {
     public static final String HOST_KEY = "host";
 
     private final String gameMode;
+    private final Integer myPlayerId;
 
     private Integer numPlayers;
-    private Integer myPlayerId;
     private Integer curPlayer;
     private Board board;
 
@@ -102,6 +101,11 @@ public class GamePlayModel extends Observable {
         }
     }
 
+    public void reset(){
+        curPlayer = 0;
+        board.reset();
+    }
+
     public void setChangedAndNotify(){
         setChanged();
         notifyObservers();
@@ -144,6 +148,4 @@ public class GamePlayModel extends Observable {
             setChangedAndNotify();
         }
     }
-
-
 }

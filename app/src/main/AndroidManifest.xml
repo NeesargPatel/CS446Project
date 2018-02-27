@@ -27,7 +27,6 @@
             android:label="@string/title_activity_gameplay"
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity android:name=".activities.LobbyActivity" />
-        <activity android:name=".activities.SinglePlayerActivity" />
         <activity android:name=".activities.BluetoothActivity"></activity>
     </application>
 
