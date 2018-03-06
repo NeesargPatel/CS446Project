@@ -74,7 +74,6 @@ public class GamePlayModel extends Observable {
             if (!isHost){
                 hostAddress = bundle.getString(LobbyActivity.EXTRA_DEVICE_ADDRESS);
             }
-
             establishBltConn(context);
         }
         else{
@@ -84,6 +83,7 @@ public class GamePlayModel extends Observable {
     }
 
     public Integer getMyPlayerId() { return myPlayerId; }
+    public Integer getCurPlayer() { return curPlayer; };
     public Integer getNumPlayers() { return numPlayers; }
     public Boolean isMyTurn(){
         return myPlayerId.equals(curPlayer);
@@ -155,13 +155,13 @@ public class GamePlayModel extends Observable {
 
     private void nextPlayer(){
         curPlayer = (curPlayer + 1) % numPlayers;
+        setChangedAndNotify();
     }
 
     private void AIPlacePieces(){
         // while it's not the turn of human player and nobody has won
         while (!curPlayer.equals(myPlayerId) && !board.isGameOver()){
             placePiece(AI.choosePos(board, curPlayer));
-            setChangedAndNotify();
         }
     }
 }

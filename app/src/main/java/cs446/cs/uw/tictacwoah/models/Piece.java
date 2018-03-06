@@ -1,14 +1,11 @@
 package cs446.cs.uw.tictacwoah.models;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 public class Piece {
 
     // small, medium, large
     public static final Integer NUM_SIZES = 3;
 
-    // playerId, size, rowId, colId
+    // playerId, sizeId, rowId, colId
     private static final Integer numInts = 4;
 
     /*
@@ -16,14 +13,14 @@ public class Piece {
         range from 1 to n (number of players) 
      */
     private final Integer playerId;
-    private final Integer size;
+    private final Integer sizeId;
     private final Integer rowId;
     private final Integer colId;
 
     // constructor
-    public Piece(Integer playerId, Integer size, Integer rowId, Integer colId) {
+    public Piece(Integer playerId, Integer sizeId, Integer rowId, Integer colId) {
         this.playerId = playerId;
-        this.size = size;
+        this.sizeId = sizeId;
         this.rowId = rowId;
         this.colId = colId;
     }
@@ -32,7 +29,7 @@ public class Piece {
         assert str.length() == numInts;
 
         playerId = Integer.parseInt(Character.toString(str.charAt(0)));
-        size = Integer.parseInt(Character.toString(str.charAt(1)));
+        sizeId = Integer.parseInt(Character.toString(str.charAt(1)));
         rowId = Integer.parseInt(Character.toString(str.charAt(2)));
         colId = Integer.parseInt(Character.toString(str.charAt(3)));
     }
@@ -40,7 +37,7 @@ public class Piece {
     public Integer getId() {
         return playerId;
     }
-    public Integer getSize() { return size; }
+    public Integer getSizeId() { return sizeId; }
     public Integer getRowId() { return rowId; }
     public Integer getColId() { return colId; }
 
@@ -49,7 +46,7 @@ public class Piece {
      */
     public byte[] toByteArray(){
         // The order should be identical with that in Piece(String)
-        String str = playerId.toString() + size.toString() + rowId.toString() + colId.toString();
+        String str = playerId.toString() + sizeId.toString() + rowId.toString() + colId.toString();
         return str.getBytes();
     }
 }

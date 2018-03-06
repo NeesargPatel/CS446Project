@@ -2,6 +2,8 @@ package cs446.cs.uw.tictacwoah.models;
 
 import android.util.Log;
 
+import cs446.cs.uw.tictacwoah.views.PieceView;
+
 public class Board {
     // 3 * 3 Board
     public static final Integer boardSize = 3;
@@ -33,7 +35,7 @@ public class Board {
     }
 
     public void reset(){
-        this.pieces = new Piece[Piece.NUM_SIZES][boardSize][boardSize];
+        this.pieces = new Piece[PieceView.SIZES.length][boardSize][boardSize];
         this.lastPlacedPiece = null;
         this.winningPattern = null;
     }
@@ -66,7 +68,7 @@ public class Board {
     // This function returns false if the desired position has been occupied,
     // returns true if the placement is successful
     public boolean placePiece(Piece piece){
-        Integer pieceSize = piece.getSize(), i = piece.getRowId(), j = piece.getColId();
+        Integer pieceSize = piece.getSizeId(), i = piece.getRowId(), j = piece.getColId();
 
         if (this.pieces[pieceSize][i][j] != null) return false;
 
