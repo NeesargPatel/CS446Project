@@ -114,6 +114,7 @@ public class GamePlayModel extends Observable {
     public void reset(){
         curPlayer = 0;
         board.reset();
+        setChangedAndNotify();
     }
 
     public void setChangedAndNotify(){

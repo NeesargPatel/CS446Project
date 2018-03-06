@@ -18,12 +18,13 @@ public class BoardView extends View {
     private final int STROKE_WIDTH = 5;
     public final int MARGIN_TOP;
 
-    private int cellWidth;
+    private float cellWidth;
     private Paint gridPaint;
 
-    public BoardView(Context context, int marginTop) {
+    public BoardView(Context context, int marginTop, float cellWidth) {
         super(context);
         MARGIN_TOP = marginTop;
+        this.cellWidth = cellWidth;
         gridPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         gridPaint.setStrokeWidth(STROKE_WIDTH);
     }
@@ -32,13 +33,13 @@ public class BoardView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        cellWidth = (width - STROKE_WIDTH * 2) / Board.boardSize;
+        cellWidth = width / Board.boardSize;
         setMeasuredDimension(width, height);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        float totalWidth = cellWidth * Board.boardSize + STROKE_WIDTH * (Board.boardSize - 1);
+        float totalWidth = cellWidth * Board.boardSize;
         for (int i = 1; i < Board.boardSize; i++) {
             // vertical lines
             float startX = cellWidth * i;
@@ -72,7 +73,7 @@ public class BoardView extends View {
         return  null;
     }
 
-    public int getCellWidth(){
+    public float getCellWidth(){
         return cellWidth;
     }
 }

@@ -37,7 +37,6 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     private BoardView boardView;
     private Button restartButton;
 
-    private float widthOfSquare;
     private PieceView[][][] boardPieces;
     private List<TurnIndicator> turnIndicators;
 
@@ -65,15 +64,31 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         rootLayout = findViewById(R.id.thisisalayout);
 
         int marginTop = marginTI * 2 + TurnIndicator.WIDTH;
-        boardView = new BoardView(this, marginTop);
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        float cellWidth = displayMetrics.widthPixels / Board.boardSize;
+        boardView = new BoardView(this, marginTop, cellWidth);
+
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
         );
         boardView.setLayoutParams(layoutParams);
+
         rootLayout.addView(boardView);
 
-        restartButton = findViewById(R.id.restart_button);
+        restartButton = new Button(this);
+        restartButton.setText("Restart");
+        restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.boardSize + 1));
+        restartButton.setVisibility(View.GONE);
+
+        layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        restartButton.setLayoutParams(layoutParams);
+
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -81,27 +96,27 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
             }
         });
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        widthOfSquare = displayMetrics.widthPixels / 3;
+        rootLayout.addView(restartButton);
 
         float heightOfScreen = displayMetrics.heightPixels;
         createDraggablePieces(heightOfScreen);
 
         boardPieces = new PieceView[PieceView.SIZES.length][Board.boardSize][Board.boardSize];
+
         turnIndicators = new LinkedList<>();
         inflateTurnIndicators();
         changeTurn();
     }
 
     private void createDraggablePieces(float heightOfScreen){
+        float cellWidth = boardView.getCellWidth();
         // For each size, I create 2 pieces,
         // so when user drags a piece, there will still be another piece on the UI
         for (int j = 0; j < 2; ++j) {
             for (int i = 0; i < PieceView.SIZES.length; ++i) {
-                float offset = (widthOfSquare - PieceView.SIZES[i]) / 2;
-                float x = widthOfSquare * i + offset;
-                float y = heightOfScreen - widthOfSquare + offset;
+                float offset = (cellWidth - PieceView.SIZES[i]) / 2;
+                float x = cellWidth * i + offset;
+                float y = boardView.MARGIN_TOP + cellWidth * Board.boardSize + offset;
                 PieceView view = PieceView.getPieceView(this, (int)x, (int)y, PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], PieceView.TRIANGLE);
                 rootLayout.addView(view);
 
@@ -196,6 +211,11 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                 }
             }
         }
+        lastPlacedPiece = null;
+        // we have to set it to null before invoke reset() on model
+        // because model will then notify this Activity to update
+        // and in update(), curPlayer will be compared to model.getCurPlayer()
+        curPlayer = null;
         model.reset();
     }
 
@@ -256,7 +276,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         int sizeId = piece.getSizeId();
         int rowId = piece.getRowId();
         int colId = piece.getColId();
-        int cellWidth = boardView.getCellWidth();
+        float cellWidth = boardView.getCellWidth();
 
         float offset = (cellWidth - PieceView.SIZES[sizeId]) / 2;
         float x = cellWidth * rowId + offset;
