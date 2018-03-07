@@ -3,14 +3,9 @@ package cs446.cs.uw.tictacwoah.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
-import android.support.annotation.Nullable;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
-import cs446.cs.uw.tictacwoah.R;
 import cs446.cs.uw.tictacwoah.models.Board;
 
 public class BoardView extends View {
@@ -33,14 +28,14 @@ public class BoardView extends View {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int width = MeasureSpec.getSize(widthMeasureSpec);
-        cellWidth = width / Board.boardSize;
+        cellWidth = width / Board.SIZE;
         setMeasuredDimension(width, height);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        float totalWidth = cellWidth * Board.boardSize;
-        for (int i = 1; i < Board.boardSize; i++) {
+        float totalWidth = cellWidth * Board.SIZE;
+        for (int i = 1; i < Board.SIZE; i++) {
             // vertical lines
             float startX = cellWidth * i;
             float startY = MARGIN_TOP;
@@ -59,7 +54,7 @@ public class BoardView extends View {
 
     // x is the center of the PieceView
     public Integer getRowId(float x){
-        for (int i = 1; i <= Board.boardSize; ++i){
+        for (int i = 1; i <= Board.SIZE; ++i){
             if (x < cellWidth * i) return i - 1;
         }
         return  null;
@@ -67,7 +62,7 @@ public class BoardView extends View {
 
     public Integer getColId(float y){
         if (y < MARGIN_TOP) return null;
-        for (int i = 1; i <= Board.boardSize; ++i){
+        for (int i = 1; i <= Board.SIZE; ++i){
             if (y < cellWidth * i + MARGIN_TOP) return i - 1;
         }
         return  null;

@@ -58,8 +58,8 @@ public class GamePlayModel extends Observable {
 
     // the intent passed to start GamePlayActivity
     public GamePlayModel(Intent intent, Context context){
-        numPlayers = 2;  // it should be passed as a parameter to ctor in the future
-        curPlayer = 0;
+        numPlayers = 4;  // it should be passed as a parameter to ctor in the future
+        curPlayer = -1;
         board = new Board();
 
         Bundle bundle = intent.getExtras();
@@ -152,6 +152,11 @@ public class GamePlayModel extends Observable {
 
             return true;
         }
+    }
+
+    // This method will be invoked when a player exhausts the time
+    public void AIPlacePiece(){
+        placePiece(AI.choosePos(board, curPlayer));
     }
 
     private void nextPlayer(){

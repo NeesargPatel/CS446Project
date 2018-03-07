@@ -1,23 +1,27 @@
 package cs446.cs.uw.tictacwoah.activities;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
 import cs446.cs.uw.tictacwoah.R;
 import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
+import cs446.cs.uw.tictacwoah.models.AI;
 import cs446.cs.uw.tictacwoah.models.Board;
 import cs446.cs.uw.tictacwoah.models.Piece;
 import cs446.cs.uw.tictacwoah.views.BoardView;
@@ -28,10 +32,14 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     // margin between TurnIndicators
     private final int marginTI = TurnIndicator.WIDTH;
+    private final int timeLimit = 10, warningTime = 5;
+    private final int millisPerSecond = 1000;
+    private final int textSize = 40, textMarginTop = 50, textMarginRight = 200;
 
     private GamePlayModel model;
     private Piece lastPlacedPiece;
     private Integer curPlayer;
+    private CountDownTimer countDownTimer;
 
     private RelativeLayout rootLayout;
     private BoardView boardView;
@@ -39,6 +47,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     private PieceView[][][] boardPieces;
     private List<TurnIndicator> turnIndicators;
+    private TextView countdownTextView;
 
     // for dragging pieces
     private float origX, origY, dX, dY;
@@ -60,55 +69,80 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         model.addObserver(this);
         lastPlacedPiece = null;
         curPlayer = null;
+        countDownTimer = new CountDownTimer(timeLimit * millisPerSecond, millisPerSecond) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long secondsUntilFinished = millisUntilFinished / millisPerSecond;
+                if (secondsUntilFinished <= warningTime){
+                    countdownTextView.setTextColor(Color.RED);
+                }
+                else {
+                    countdownTextView.setTextColor(Color.BLACK);
+                }
+                String text = String.format(Locale.CANADA, "%d", secondsUntilFinished);
+                countdownTextView.setText(text);
+            }
+
+            @Override
+            public void onFinish() {
+                if (model.isMyTurn()){
+                    model.AIPlacePiece();
+                }
+            }
+        };
 
         rootLayout = findViewById(R.id.thisisalayout);
 
         int marginTop = marginTI * 2 + TurnIndicator.WIDTH;
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        float cellWidth = displayMetrics.widthPixels / Board.boardSize;
+        float cellWidth = displayMetrics.widthPixels / Board.SIZE;
         boardView = new BoardView(this, marginTop, cellWidth);
-
         RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
         );
         boardView.setLayoutParams(layoutParams);
-
         rootLayout.addView(boardView);
 
         restartButton = new Button(this);
         restartButton.setText("Restart");
-        restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.boardSize + 1));
-        restartButton.setVisibility(View.GONE);
-
+        restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
         layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
         );
         layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
         restartButton.setLayoutParams(layoutParams);
-
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 newGame();
             }
         });
-
         rootLayout.addView(restartButton);
 
-        float heightOfScreen = displayMetrics.heightPixels;
-        createDraggablePieces(heightOfScreen);
+        createDraggablePieces();
 
-        boardPieces = new PieceView[PieceView.SIZES.length][Board.boardSize][Board.boardSize];
+        boardPieces = new PieceView[PieceView.SIZES.length][Board.SIZE][Board.SIZE];
 
         turnIndicators = new LinkedList<>();
         inflateTurnIndicators();
-        changeTurn();
+
+        countdownTextView = new TextView(this);
+        countdownTextView.setTextSize(textSize);
+        countdownTextView.setText(Integer.toString(timeLimit));
+        countdownTextView.setX(boardView.getCellWidth() * Board.SIZE - textMarginRight);
+        countdownTextView.setY(textMarginTop);
+        layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        countdownTextView.setLayoutParams(layoutParams);
+        rootLayout.addView(countdownTextView);
     }
 
-    private void createDraggablePieces(float heightOfScreen){
+    private void createDraggablePieces(){
         float cellWidth = boardView.getCellWidth();
         // For each size, I create 2 pieces,
         // so when user drags a piece, there will still be another piece on the UI
@@ -116,8 +150,9 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
             for (int i = 0; i < PieceView.SIZES.length; ++i) {
                 float offset = (cellWidth - PieceView.SIZES[i]) / 2;
                 float x = cellWidth * i + offset;
-                float y = boardView.MARGIN_TOP + cellWidth * Board.boardSize + offset;
-                PieceView view = PieceView.getPieceView(this, (int)x, (int)y, PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], PieceView.TRIANGLE);
+                float y = boardView.MARGIN_TOP + cellWidth * Board.SIZE + offset;
+                PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
+                        PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], PieceView.TRIANGLE);
                 rootLayout.addView(view);
 
                 final int sizeId = i;
@@ -153,13 +188,16 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
                                 // The piece is dragged onto the board, but it's not the user's turn
                                 if (!model.isMyTurn()){
-                                    Toast toast = Toast.makeText(getApplicationContext(), "It's not your turn", Toast.LENGTH_SHORT);
+                                    Toast toast = Toast.makeText(getApplicationContext(),
+                                            "It's not your turn", Toast.LENGTH_SHORT);
                                     toast.show();
                                     break;
                                 }
 
-                                if (!model.placePiece(new Piece(model.getMyPlayerId(), sizeId, rowId, colId))){
-                                    Toast toast = Toast.makeText(getApplicationContext(), "This space is occupied.", Toast.LENGTH_SHORT);
+                                Piece piece = new Piece(model.getMyPlayerId(), sizeId, rowId, colId);
+                                if (!model.placePiece(piece)){
+                                    Toast toast = Toast.makeText(getApplicationContext(),
+                                            "This space is occupied.", Toast.LENGTH_SHORT);
                                     toast.show();
                                 }
 
@@ -217,6 +255,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         // and in update(), curPlayer will be compared to model.getCurPlayer()
         curPlayer = null;
         model.reset();
+        countDownTimer.start();
     }
 
     @Override
@@ -235,6 +274,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         if (piece != null && lastPlacedPiece != piece){
             drawPieceOnBoard(piece);
             lastPlacedPiece = piece;
+            countDownTimer.start();
         }
 
         // check if game is over and show the winning pattern
@@ -243,6 +283,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
             showWinningPattern(model.getWinningPattern());
             showWinOrLoseMessage(model.getWinningPattern()[0].getId());
             restartButton.setVisibility(View.VISIBLE);
+            countDownTimer.cancel();
         }
     }
 
@@ -268,8 +309,6 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         // curPlayer in this Activity will be updated when we update curPlayer in its model
         curPlayer = model.getCurPlayer().intValue();
         turnIndicators.get(curPlayer).startAnimation();
-        TurnIndicator TI = turnIndicators.get(curPlayer);
-        Log.d("TI", Double.toString(TI.getX()) + " " + Double.toString(TI.getY()) + " " + Integer.toString(TI.getWidth()) + " " + Integer.toString(TI.getHeight()));
     }
 
     private void drawPieceOnBoard(Piece piece){
@@ -282,7 +321,8 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         float x = cellWidth * rowId + offset;
         float y = boardView.MARGIN_TOP + cellWidth * colId + offset;
 
-        PieceView view = PieceView.getPieceView(this, (int)x, (int)y, PieceView.SIZES[sizeId], PieceView.COLORS[piece.getId()], PieceView.TRIANGLE);
+        PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
+                PieceView.SIZES[sizeId], PieceView.COLORS[piece.getId()], PieceView.TRIANGLE);
         rootLayout.addView(view);
         boardPieces[sizeId][rowId][colId] = view;
     }
