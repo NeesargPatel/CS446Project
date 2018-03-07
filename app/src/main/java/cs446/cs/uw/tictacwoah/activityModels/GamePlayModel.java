@@ -15,6 +15,7 @@ import cs446.cs.uw.tictacwoah.models.AI;
 import cs446.cs.uw.tictacwoah.models.BluetoothService;
 import cs446.cs.uw.tictacwoah.models.Board;
 import cs446.cs.uw.tictacwoah.models.Piece;
+import cs446.cs.uw.tictacwoah.models.Setting;
 
 /**
  * Created by ASUS on 2018/2/26.
@@ -29,6 +30,10 @@ public class GamePlayModel extends Observable {
     public static final String MULTIPLAYER_MODE = "multiplayerMode";
     public static final String HOST_KEY = "host";
 
+    public static final int MAX_TIME_LIMIT = 30;
+    public static final int TIME_LIMIT_INTERVAL = 5;
+    public static final int MAX_AI_PLAYERS = 3;
+
     private final String gameMode;
     private final Integer myPlayerId;
     private Boolean isHost;
@@ -37,6 +42,7 @@ public class GamePlayModel extends Observable {
     private Integer numPlayers;
     private Integer curPlayer;
     private Board board;
+    private AI.LEVEL level;
 
     private BluetoothService bluetoothService;
     private final Handler handler = new Handler() {
@@ -56,7 +62,6 @@ public class GamePlayModel extends Observable {
 
     // the intent passed to start GamePlayActivity
     public GamePlayModel(Intent intent, Context context){
-        numPlayers = 4;  // it should be passed as a parameter to ctor in the future
         curPlayer = -1;
         board = new Board();
 
@@ -64,6 +69,8 @@ public class GamePlayModel extends Observable {
 
         gameMode = bundle.getString(GAME_MODE_KEY);
         if (gameMode.equals(MULTIPLAYER_MODE)){
+            numPlayers = 2;
+            level = AI.LEVEL.EASY;
             isHost = bundle.getBoolean(HOST_KEY);
             // Because we only support 2 players now
             // assign 0 to host, 1 if not
@@ -77,6 +84,9 @@ public class GamePlayModel extends Observable {
         else{
             bluetoothService = null;
             myPlayerId = 0;
+            Setting setting = (Setting) bundle.getSerializable(Setting.SETTING_KEY);
+            numPlayers = setting.getNumAIs() + 1;  // +1 for the human player
+            level = setting.getLevel();
         }
     }
 

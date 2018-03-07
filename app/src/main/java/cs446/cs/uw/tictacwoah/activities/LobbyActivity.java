@@ -194,7 +194,7 @@ public class LobbyActivity extends Activity {
             intent.putExtra(GamePlayModel.HOST_KEY, getIntent().getExtras().getBoolean(GamePlayModel.HOST_KEY));
             startActivity(intent);
             // Set result and finish this Activity
-            setResult(Activity.RESULT_OK, intent);
+            setResult(Activity.RESULT_OK);
             finish();
         }
     };

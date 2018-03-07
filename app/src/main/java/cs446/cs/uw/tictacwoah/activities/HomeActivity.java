@@ -44,7 +44,7 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void onSingleBtn(View view) {
-        Intent singlePlayer = new Intent(this, GamePlayActivity.class);
+        Intent singlePlayer = new Intent(this, SettingActivity.class);
         singlePlayer.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.SINGLE_MODE);
         startActivity(singlePlayer);
     }

@@ -1,3 +1,5 @@
 <resources>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="padding_between_spinner_group">20dp</dimen>
+    <dimen name="padding_between_spinner_and_text">10dp</dimen>
 </resources>

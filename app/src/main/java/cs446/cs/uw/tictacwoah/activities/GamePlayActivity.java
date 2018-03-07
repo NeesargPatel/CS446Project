@@ -23,6 +23,7 @@ import cs446.cs.uw.tictacwoah.R;
 import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
 import cs446.cs.uw.tictacwoah.models.Board;
 import cs446.cs.uw.tictacwoah.models.Piece;
+import cs446.cs.uw.tictacwoah.models.Setting;
 import cs446.cs.uw.tictacwoah.views.BoardView;
 import cs446.cs.uw.tictacwoah.views.PieceView;
 import cs446.cs.uw.tictacwoah.views.TurnIndicator;
@@ -31,7 +32,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     // margin between TurnIndicators
     private final int marginTI = TurnIndicator.WIDTH;
-    private final int timeLimit = 10, WARNING_TIME = 5;
+    private final int WARNING_TIME = 5;
     private final int MILLIS_PER_SECOND = 1000;
     private final int TEXT_SIZE = 40, TEXT_MARGIN_TOP = 50, TEXT_MARGIN_RIGHT = 200;
 
@@ -39,6 +40,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     private Piece lastPlacedPiece;
     private Integer curPlayer;
     private CountDownTimer countDownTimer;
+    private Setting setting;
 
     private RelativeLayout rootLayout;
     private BoardView boardView;
@@ -64,11 +66,13 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         );
 
+        setting = (Setting) getIntent().getExtras().getSerializable(Setting.SETTING_KEY);
+
         model = new GamePlayModel(getIntent(), getApplicationContext());
         model.addObserver(this);
         lastPlacedPiece = null;
         curPlayer = null;
-        countDownTimer = new CountDownTimer(timeLimit * MILLIS_PER_SECOND, MILLIS_PER_SECOND) {
+        countDownTimer = new CountDownTimer(setting.getTimeLimit() * MILLIS_PER_SECOND, MILLIS_PER_SECOND) {
             @Override
             public void onTick(long millisUntilFinished) {
                 long secondsUntilFinished = millisUntilFinished / MILLIS_PER_SECOND;
@@ -130,7 +134,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
         countdownTextView = new TextView(this);
         countdownTextView.setTextSize(TEXT_SIZE);
-        countdownTextView.setText(Integer.toString(timeLimit));
+        countdownTextView.setText(String.format(Locale.CANADA, "%d", setting.getTimeLimit()));
         countdownTextView.setX(boardView.getCellWidth() * Board.SIZE - TEXT_MARGIN_RIGHT);
         countdownTextView.setY(TEXT_MARGIN_TOP);
         layoutParams = new RelativeLayout.LayoutParams(
@@ -139,6 +143,12 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         );
         countdownTextView.setLayoutParams(layoutParams);
         rootLayout.addView(countdownTextView);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        model.closeBltConn();
     }
 
     private void createDraggablePieces(){
@@ -151,7 +161,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                 float x = cellWidth * i + offset;
                 float y = boardView.MARGIN_TOP + cellWidth * Board.SIZE + offset;
                 PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
-                        PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], PieceView.SHAPE.CIRCLE);
+                        PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], setting.getShape());
                 rootLayout.addView(view);
 
                 final int sizeId = i;
@@ -225,17 +235,6 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         return view.getY() + view.getHeight() / 2;
     }
 
-//    @Override
-//    protected void onResume(){
-//        super.onResume();
-//    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        model.closeBltConn();
-    }
-
     private void newGame() {
         restartButton.setVisibility(View.GONE);
         for (int i = 0; i < boardPieces.length; ++i){
@@ -248,7 +247,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                 }
             }
         }
-        countdownTextView.setText(Integer.toString(timeLimit));
+        countdownTextView.setText(String.format(Locale.CANADA, "%d", setting.getTimeLimit()));
         lastPlacedPiece = null;
         // we have to set it to null before invoke reset() on model
         // because model will then notify this Activity to update
@@ -304,10 +303,9 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
             // stop the animation because the turn changes
             turnIndicators.get(curPlayer).stopAnimation();
         }
-        // assign value but not reference
-        // if we assign reference here,
-        // curPlayer in this Activity will be updated when we update curPlayer in its model
-        curPlayer = model.getCurPlayer().intValue();
+        // Since Integer is mutable, so we can directly use assignment operator here
+        // (assign the underlying value of model.getCurPlayer() to curPlayer)
+        curPlayer = model.getCurPlayer();
         turnIndicators.get(curPlayer).startAnimation();
     }
 
@@ -322,7 +320,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         float y = boardView.MARGIN_TOP + cellWidth * colId + offset;
 
         PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
-                PieceView.SIZES[sizeId], PieceView.COLORS[piece.getId()], PieceView.SHAPE.CIRCLE);
+                PieceView.SIZES[sizeId], PieceView.COLORS[piece.getId()], setting.getShape());
         rootLayout.addView(view);
         boardPieces[sizeId][rowId][colId] = view;
     }
