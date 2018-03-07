@@ -151,7 +151,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                 float x = cellWidth * i + offset;
                 float y = boardView.MARGIN_TOP + cellWidth * Board.SIZE + offset;
                 PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
-                        PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], PieceView.TRIANGLE);
+                        PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], PieceView.SHAPE.CIRCLE);
                 rootLayout.addView(view);
 
                 final int sizeId = i;
@@ -322,7 +322,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         float y = boardView.MARGIN_TOP + cellWidth * colId + offset;
 
         PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
-                PieceView.SIZES[sizeId], PieceView.COLORS[piece.getId()], PieceView.TRIANGLE);
+                PieceView.SIZES[sizeId], PieceView.COLORS[piece.getId()], PieceView.SHAPE.CIRCLE);
         rootLayout.addView(view);
         boardPieces[sizeId][rowId][colId] = view;
     }

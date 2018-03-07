@@ -154,7 +154,7 @@ public class GamePlayModel extends Observable {
 
     // This method will be invoked when a player exhausts the time
     public void AIPlacePiece(){
-        placePiece(AI.choosePos(board, curPlayer));
+        placePiece(AI.choosePos(board, curPlayer, AI.LEVEL.EASY));
     }
 
     private void nextPlayer(){
@@ -165,7 +165,7 @@ public class GamePlayModel extends Observable {
     private void AIPlacePieces(){
         // while it's not the turn of human player and nobody has won
         while (!curPlayer.equals(myPlayerId) && !board.isGameOver()){
-            placePiece(AI.choosePos(board, curPlayer));
+            placePiece(AI.choosePos(board, curPlayer, AI.LEVEL.EASY));
         }
     }
 }

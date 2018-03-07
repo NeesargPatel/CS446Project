@@ -28,11 +28,13 @@ public class PieceView extends View{
         0xFFE59866,  // orange
         0xFFEC7063  // red
     };
-    public static final int RECTANGLE = 0;
-    public static final int CIRCLE = 1;
-    public static final int TRIANGLE = 2;
+    public enum SHAPE{
+        RECTANGLE,
+        CIRCLE,
+        TRIANGLE
+    }
 
-    public static PieceView getPieceView(Context context, int x, int y, int size, int color, int shape){
+    public static PieceView getPieceView(Context context, int x, int y, int size, int color, SHAPE shape){
         switch (shape){
             case RECTANGLE:
                 return new  RectanglePieceView(context, x, y, size, color);
