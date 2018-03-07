@@ -21,7 +21,6 @@ import java.util.Observer;
 
 import cs446.cs.uw.tictacwoah.R;
 import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
-import cs446.cs.uw.tictacwoah.models.AI;
 import cs446.cs.uw.tictacwoah.models.Board;
 import cs446.cs.uw.tictacwoah.models.Piece;
 import cs446.cs.uw.tictacwoah.views.BoardView;
@@ -32,9 +31,9 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     // margin between TurnIndicators
     private final int marginTI = TurnIndicator.WIDTH;
-    private final int timeLimit = 10, warningTime = 5;
-    private final int millisPerSecond = 1000;
-    private final int textSize = 40, textMarginTop = 50, textMarginRight = 200;
+    private final int timeLimit = 10, WARNING_TIME = 5;
+    private final int MILLIS_PER_SECOND = 1000;
+    private final int TEXT_SIZE = 40, TEXT_MARGIN_TOP = 50, TEXT_MARGIN_RIGHT = 200;
 
     private GamePlayModel model;
     private Piece lastPlacedPiece;
@@ -69,11 +68,11 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         model.addObserver(this);
         lastPlacedPiece = null;
         curPlayer = null;
-        countDownTimer = new CountDownTimer(timeLimit * millisPerSecond, millisPerSecond) {
+        countDownTimer = new CountDownTimer(timeLimit * MILLIS_PER_SECOND, MILLIS_PER_SECOND) {
             @Override
             public void onTick(long millisUntilFinished) {
-                long secondsUntilFinished = millisUntilFinished / millisPerSecond;
-                if (secondsUntilFinished <= warningTime){
+                long secondsUntilFinished = millisUntilFinished / MILLIS_PER_SECOND;
+                if (secondsUntilFinished <= WARNING_TIME){
                     countdownTextView.setTextColor(Color.RED);
                 }
                 else {
@@ -130,10 +129,10 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         inflateTurnIndicators();
 
         countdownTextView = new TextView(this);
-        countdownTextView.setTextSize(textSize);
+        countdownTextView.setTextSize(TEXT_SIZE);
         countdownTextView.setText(Integer.toString(timeLimit));
-        countdownTextView.setX(boardView.getCellWidth() * Board.SIZE - textMarginRight);
-        countdownTextView.setY(textMarginTop);
+        countdownTextView.setX(boardView.getCellWidth() * Board.SIZE - TEXT_MARGIN_RIGHT);
+        countdownTextView.setY(TEXT_MARGIN_TOP);
         layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -249,6 +248,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                 }
             }
         }
+        countdownTextView.setText(Integer.toString(timeLimit));
         lastPlacedPiece = null;
         // we have to set it to null before invoke reset() on model
         // because model will then notify this Activity to update

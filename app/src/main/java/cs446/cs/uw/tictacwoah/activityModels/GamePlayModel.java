@@ -45,10 +45,8 @@ public class GamePlayModel extends Observable {
             switch (msg.what) {
                 // when the blue tooth socket receives messages from other players
                 case 2:
-                    byte[] readBuf = (byte[]) msg.obj;
-                    // construct a string from the valid bytes in the buffer
-                    String readMessage = new String(readBuf, 0, msg.arg1);
-                    placePiece(new Piece(readMessage));
+                    Piece piece = (Piece) msg.obj;
+                    placePiece(piece);
                     break;
                 default:
                     // we should not run into this block
@@ -143,7 +141,7 @@ public class GamePlayModel extends Observable {
             if (piece.getId().equals(myPlayerId)){
                 // tell other human players I've placed this piece
                 if (gameMode.equals(MULTIPLAYER_MODE)){
-                    bluetoothService.write(piece.toByteArray());
+                    bluetoothService.write(piece);
                 }
                 else {  // single player mode
                     AIPlacePieces();

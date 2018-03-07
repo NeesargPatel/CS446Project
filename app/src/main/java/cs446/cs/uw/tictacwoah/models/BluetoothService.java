@@ -12,6 +12,8 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
@@ -224,10 +226,10 @@ public class BluetoothService {
     /**
      * Write to the ConnectedThread in an unsynchronized manner
      *
-     * @param out The bytes to write
-     * @see ConnectedThread#write(byte[])
+     * @param o The serializable object to send
+     * @see ConnectedThread#write(Object)
      */
-    public void write(byte[] out) {
+    public void write(Object o) {
         // Create temporary object
         ConnectedThread r;
         // Synchronize a copy of the ConnectedThread
@@ -236,7 +238,7 @@ public class BluetoothService {
             r = mConnectedThread;
         }
         // Perform the write unsynchronized
-        r.write(out);
+        r.write(o);
     }
 
     /**
@@ -443,19 +445,19 @@ public class BluetoothService {
      */
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
-        private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
+        private final ObjectInputStream mmInStream;
+        private final ObjectOutputStream mmOutStream;
 
         public ConnectedThread(BluetoothSocket socket, String socketType) {
             Log.d(TAG, "create ConnectedThread: " + socketType);
             mmSocket = socket;
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
+            ObjectInputStream tmpIn = null;
+            ObjectOutputStream tmpOut = null;
 
             // Get the BluetoothSocket input and output streams
             try {
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
+                tmpIn = new ObjectInputStream(socket.getInputStream());
+                tmpOut = new ObjectOutputStream(socket.getOutputStream());
             } catch (IOException e) {
                 Log.e(TAG, "temp sockets not created", e);
             }
@@ -467,22 +469,22 @@ public class BluetoothService {
 
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
-            byte[] buffer = new byte[1024];
-            int bytes;
+            Object o;
 
             // Keep listening to the InputStream while connected
             while (mState == STATE_CONNECTED) {
                 try {
                     // Read from the InputStream
-                    bytes = mmInStream.read(buffer);
-
+                    o = mmInStream.readObject();
                     // Send the obtained bytes to the UI Activity
-                    mHandler.obtainMessage(2, bytes, -1, buffer)
-                            .sendToTarget();
+                    mHandler.obtainMessage(2, o).sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
                     break;
+                }
+                catch (ClassNotFoundException e) {
+                    // When a class of a serialized object cannot be found
                 }
             }
         }
@@ -490,15 +492,13 @@ public class BluetoothService {
         /**
          * Write to the connected OutStream.
          *
-         * @param buffer The bytes to write
+         * @param o The serializable object to send
          */
-        public void write(byte[] buffer) {
+        public void write(Object o) {
             try {
-                mmOutStream.write(buffer);
-
+                mmOutStream.writeObject(o);
                 // Share the sent message back to the UI Activity
-                mHandler.obtainMessage(3, -1, -1, buffer)
-                        .sendToTarget();
+                mHandler.obtainMessage(3, o).sendToTarget();
             } catch (IOException e) {
                 Log.e(TAG, "Exception during write", e);
             }
