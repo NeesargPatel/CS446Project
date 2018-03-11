@@ -1,5 +1,7 @@
 package cs446.cs.uw.tictacwoah.views;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -50,6 +52,15 @@ public class PieceView extends View{
     private int size;
     private ObjectAnimator animator;
     protected Paint paint;  // set it protected because derived classes need to use it to draw
+    private Animator.AnimatorListener animatorListener = new AnimatorListenerAdapter() {
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            super.onAnimationEnd(animation);
+            animation.removeListener(this);
+            animation.setDuration(0);
+            ((ObjectAnimator) animation).reverse();
+        }
+    };
 
     public PieceView(Context context, int x, int y, int size, int color) {
         super(context);
@@ -114,13 +125,15 @@ public class PieceView extends View{
     }
 
     public void startAnimation(){
+//        animator.addListener(animatorListener);
         animator.setDuration(ANIMATION_DURATION);
         animator.start();
     }
 
     public void stopAnimation(){
-        animator.setDuration(0);
         animator.reverse();
+        animator.cancel();
+//        animator.end();
         // If I put animator.cancel() here, the animation won't stop
     }
 

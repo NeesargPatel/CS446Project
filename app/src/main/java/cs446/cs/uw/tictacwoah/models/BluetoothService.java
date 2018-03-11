@@ -476,7 +476,7 @@ public class BluetoothService {
                 try {
                     // Read from the InputStream
                     o = mmInStream.readObject();
-                    // Send the obtained bytes to the UI Activity
+                    // Send the received object to the UI Activity
                     mHandler.obtainMessage(2, o).sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);

@@ -36,6 +36,9 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     private final int MILLIS_PER_SECOND = 1000;
     private final int TEXT_SIZE = 40, TEXT_MARGIN_TOP = 50, TEXT_MARGIN_RIGHT = 200;
 
+    private final CharSequence initialButtonText = "Start";
+    private final CharSequence reStartButtonText = "Restart";
+
     private GamePlayModel model;
     private Piece lastPlacedPiece;
     private Integer curPlayer;
@@ -109,7 +112,8 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         rootLayout.addView(boardView);
 
         restartButton = new Button(this);
-        restartButton.setText("Restart");
+
+        restartButton.setText(initialButtonText);
         restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
         layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
@@ -263,12 +267,6 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         // when number of players increase
         inflateTurnIndicators();
 
-        // because curPlay may have not been initialized (null)
-        // so I invoke equals() on model.getCurPlayer()
-        if (!model.getCurPlayer().equals(curPlayer)){
-            changeTurn();
-        }
-
         Piece piece = model.getLastPlacedPiece();
         if (piece != null && lastPlacedPiece != piece){
             drawPieceOnBoard(piece);
@@ -279,10 +277,19 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         // check if game is over and show the winning pattern
         if (model.isGameOver()){
             turnIndicators.get(curPlayer).stopAnimation();
+            countDownTimer.cancel();
             showWinningPattern(model.getWinningPattern());
             showWinOrLoseMessage(model.getWinningPattern()[0].getId());
+            restartButton.setText(reStartButtonText);
             restartButton.setVisibility(View.VISIBLE);
-            countDownTimer.cancel();
+        }
+        // Only when the game is not over should we need to change the turn
+        else {
+            // because curPlay may have not been initialized (null)
+            // so I invoke equals() on model.getCurPlayer()
+            if (!model.getCurPlayer().equals(curPlayer)){
+                changeTurn();
+            }
         }
     }
 

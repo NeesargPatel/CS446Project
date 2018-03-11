@@ -14,6 +14,11 @@ public class Setting implements Serializable {
 
     public static final String SETTING_KEY = "setting_key";
 
+    public static final PieceView.SHAPE defulatShape = PieceView.SHAPE.CIRCLE;
+    public static final int defaultTimeLimit = 15;
+    public static final AI.LEVEL defaultAILevel = AI.LEVEL.EASY;
+    public static final int defaultNumAIs = 1;
+
     private PieceView.SHAPE shape;
     private int timeLimit;
     private AI.LEVEL level;
@@ -21,10 +26,10 @@ public class Setting implements Serializable {
 
     // default settings
     public Setting(){
-        shape = PieceView.SHAPE.CIRCLE;
-        timeLimit = 15;
-        level = AI.LEVEL.EASY;
-        numAIs = 1;
+        shape = defulatShape;
+        timeLimit = defaultTimeLimit;
+        level = defaultAILevel;
+        numAIs = defaultNumAIs;
     }
 
     public PieceView.SHAPE getShape() {

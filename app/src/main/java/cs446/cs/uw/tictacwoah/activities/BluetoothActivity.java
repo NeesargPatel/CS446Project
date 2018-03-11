@@ -48,12 +48,18 @@ public class BluetoothActivity extends AppCompatActivity {
         if (bluetoothAdapter.isEnabled()){
             Intent intent;
             if (view.getId() == R.id.join_button){
+                // go to lobby to find a room to join
                 intent = new Intent(this, LobbyActivity.class);
             }
-            else intent = new Intent(this, GamePlayActivity.class);
+            // go to adjust the settings for the game the user is going to host
+            else intent = new Intent(this, SettingActivity.class);
 
-            intent.putExtra(GamePlayModel.HOST_KEY, isHost);  // creator of room is host
+            intent.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.GameMode.MULTI_PLAYER);
+            intent.putExtra(GamePlayModel.HOST_KEY, isHost);
             startActivity(intent);
+            // Set result and finish this Activity
+            setResult(Activity.RESULT_OK);
+            finish();
         }
         else {
             Intent enableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);

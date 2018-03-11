@@ -45,12 +45,13 @@ public class HomeActivity extends AppCompatActivity {
 
     public void onSingleBtn(View view) {
         Intent singlePlayer = new Intent(this, SettingActivity.class);
-        singlePlayer.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.SINGLE_MODE);
+        singlePlayer.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.GameMode.SINGLE);
         startActivity(singlePlayer);
     }
 
     public void onBlueBtn(View view) {
         Intent bluetooth = new Intent(this, BluetoothActivity.class);
+        bluetooth.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.GameMode.MULTI_PLAYER);
         startActivity(bluetooth);
     }
 }

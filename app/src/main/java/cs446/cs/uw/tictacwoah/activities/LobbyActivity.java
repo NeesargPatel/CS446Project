@@ -37,6 +37,7 @@ import java.util.Set;
 
 import cs446.cs.uw.tictacwoah.R;
 import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
+import cs446.cs.uw.tictacwoah.models.Setting;
 
 /**
  * This Activity appears as a dialog. It lists any paired devices and
@@ -186,12 +187,20 @@ public class LobbyActivity extends Activity {
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
 
-            // Create the result Intent and include the MAC address
 
             Intent intent = new Intent(getApplicationContext(), GamePlayActivity.class);
             intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
-            intent.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.MULTIPLAYER_MODE);
-            intent.putExtra(GamePlayModel.HOST_KEY, getIntent().getExtras().getBoolean(GamePlayModel.HOST_KEY));
+            intent.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.GameMode.MULTI_PLAYER);
+            // The fact that we're in this Activity means the user is not the host
+            intent.putExtra(GamePlayModel.HOST_KEY, false);
+
+            /**
+                        * We should receive a Setting object from the host before invoking startActivity(),
+                        * and I just put a Setting object for now to avoid crashing.
+                        * We need to refactor it later on.
+                        */
+            intent.putExtra(Setting.SETTING_KEY, new Setting());
+
             startActivity(intent);
             // Set result and finish this Activity
             setResult(Activity.RESULT_OK);

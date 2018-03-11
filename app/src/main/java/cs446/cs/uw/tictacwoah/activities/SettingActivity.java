@@ -60,8 +60,9 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
             }
         });
 
-        String gameMode = getIntent().getExtras().getString(GamePlayModel.GAME_MODE_KEY);
-        if (gameMode.equals(GamePlayModel.MULTIPLAYER_MODE)){
+        GamePlayModel.GameMode gameMode = (GamePlayModel.GameMode)
+                getIntent().getExtras().getSerializable(GamePlayModel.GAME_MODE_KEY);
+        if (gameMode.equals(GamePlayModel.GameMode.MULTI_PLAYER)){
             AILevelSpinner.setVisibility(View.GONE);
             numberOfAISpinner.setVisibility(View.GONE);
         }
@@ -98,7 +99,7 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         for (PieceView.SHAPE shape : PieceView.SHAPE.values()){
             spinnerArray.add(shape.toString());
         }
-        setSpinnerArray(shapeSpinner, spinnerArray);
+        setSpinnerArrayAndSelectDefaultOption(shapeSpinner, spinnerArray, Setting.defulatShape.toString());
 
         spinnerArray = new ArrayList<>();
         int interval = GamePlayModel.TIME_LIMIT_INTERVAL;
@@ -106,32 +107,34 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         for (int i = interval; i <= max; i += interval){
             spinnerArray.add(Integer.toString(i));
         }
-        setSpinnerArray(timeLimitSpinner, spinnerArray);
+        setSpinnerArrayAndSelectDefaultOption(timeLimitSpinner, spinnerArray, Integer.toString(Setting.defaultTimeLimit));
 
         spinnerArray = new ArrayList<>();
         for (AI.LEVEL level : AI.LEVEL.values()){
             spinnerArray.add(level.toString());
         }
-        setSpinnerArray(AILevelSpinner, spinnerArray);
+        setSpinnerArrayAndSelectDefaultOption(AILevelSpinner, spinnerArray, Setting.defaultAILevel.toString());
 
         spinnerArray = new ArrayList<>();
         for (int i = 1; i <= GamePlayModel.MAX_AI_PLAYERS; ++i){
             spinnerArray.add(Integer.toString(i));
         }
-        setSpinnerArray(numberOfAISpinner, spinnerArray);
+        setSpinnerArrayAndSelectDefaultOption(numberOfAISpinner, spinnerArray, Integer.toString(Setting.defaultNumAIs));
     }
 
-    private void setSpinnerArray(Spinner spinner, List<String> items){
+    private void setSpinnerArrayAndSelectDefaultOption(Spinner spinner, List<String> items, String option){
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_spinner_item, items);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
+        spinner.setSelection(adapter.getPosition(option));
     }
 
     private void onClickPlayButton(){
         Intent intent = new Intent(this, GamePlayActivity.class);
         intent.putExtra(Setting.SETTING_KEY, setting);
-        String gameMode = getIntent().getExtras().getString(GamePlayModel.GAME_MODE_KEY);
+        GamePlayModel.GameMode gameMode = (GamePlayModel.GameMode)
+                getIntent().getExtras().getSerializable(GamePlayModel.GAME_MODE_KEY);
         intent.putExtra(GamePlayModel.GAME_MODE_KEY, gameMode);
         startActivity(intent);
         // Set result and finish this Activity
