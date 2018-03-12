@@ -1,34 +1,27 @@
 package cs446.cs.uw.tictacwoah.views;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Rect;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.widget.RelativeLayout;
-
-import cs446.cs.uw.tictacwoah.models.Piece;
 
 /**
  * Created by ASUS on 2018/3/4.
  */
 
 public class PieceView extends View{
-    private static final int WHITE = 0;  // for animation
     private static final int ANIMATION_DURATION = 800;  // in ms
     protected static final int STROKE_WIDTH = 10;  // derived classes need to use it to calculate size of shape to be drawn
     public static final int[] SIZES = new int[] { 90, 160, 230 };
     public static final int[] COLORS = new int[] {
-        0xFF85C1E9,  // blue
-        0xFF82E0AA,  // green
-        0xFFE59866,  // orange
-        0xFFEC7063  // red
+        0xFF85C1E9,  // light blue
+        0xFF82E0AA,  // light green
+        0xFFE59866,  // light orange
+        0xFFEC7063  // light red
     };
     public enum SHAPE{
         RECTANGLE,
@@ -49,22 +42,16 @@ public class PieceView extends View{
         }
     }
 
+    private final int START_COLOR, END_COLOR;
     private int size;
     private ObjectAnimator animator;
     protected Paint paint;  // set it protected because derived classes need to use it to draw
-    private Animator.AnimatorListener animatorListener = new AnimatorListenerAdapter() {
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            super.onAnimationEnd(animation);
-            animation.removeListener(this);
-            animation.setDuration(0);
-            ((ObjectAnimator) animation).reverse();
-        }
-    };
 
     public PieceView(Context context, int x, int y, int size, int color) {
         super(context);
-        init(size, color);
+        START_COLOR = color;
+        END_COLOR = calculateEndColor(START_COLOR);
+        init(size);
         setupLayout(x, y, size);
     }
 
@@ -125,27 +112,27 @@ public class PieceView extends View{
     }
 
     public void startAnimation(){
-//        animator.addListener(animatorListener);
-        animator.setDuration(ANIMATION_DURATION);
         animator.start();
     }
 
     public void stopAnimation(){
-        animator.reverse();
         animator.cancel();
-//        animator.end();
-        // If I put animator.cancel() here, the animation won't stop
+        setColor(START_COLOR);
     }
 
-    private void init(int size, int color){
+    private int calculateEndColor(int startColor){
+        return startColor & 0x00FFFFFF;  // change alpha of startColor to 0
+    }
+
+    private void init(int size){
         this.size = size;
 
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(color);
+        paint.setColor(START_COLOR);
         paint.setStrokeWidth(STROKE_WIDTH);
         paint.setStyle(Paint.Style.STROKE);
 
-        animator = ObjectAnimator.ofArgb(this, "color", WHITE);
+        animator = ObjectAnimator.ofArgb(this, "color", END_COLOR);
         animator.setDuration(ANIMATION_DURATION);
         animator.setRepeatCount(Animation.INFINITE);
         animator.setRepeatMode(ValueAnimator.REVERSE);

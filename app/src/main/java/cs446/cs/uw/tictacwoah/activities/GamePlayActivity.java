@@ -91,6 +91,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
             @Override
             public void onFinish() {
+                countdownTextView.setText("0");
                 if (model.isMyTurn()){
                     model.AIPlacePiece();
                 }
@@ -147,6 +148,12 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         );
         countdownTextView.setLayoutParams(layoutParams);
         rootLayout.addView(countdownTextView);
+
+        // We should start a new game when the host starts the game
+        // need refactor in the future
+        if (!model.getIsHost()){
+            newGame();
+        }
     }
 
     @Override

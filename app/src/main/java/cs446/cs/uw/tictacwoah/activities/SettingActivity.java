@@ -136,6 +136,9 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         GamePlayModel.GameMode gameMode = (GamePlayModel.GameMode)
                 getIntent().getExtras().getSerializable(GamePlayModel.GAME_MODE_KEY);
         intent.putExtra(GamePlayModel.GAME_MODE_KEY, gameMode);
+        if (gameMode.equals(GamePlayModel.GameMode.MULTI_PLAYER)){
+            intent.putExtra(GamePlayModel.HOST_KEY, true);  // Only the host will be in this Activity
+        }
         startActivity(intent);
         // Set result and finish this Activity
         setResult(Activity.RESULT_OK);

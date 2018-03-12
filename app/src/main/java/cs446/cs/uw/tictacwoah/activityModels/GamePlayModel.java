@@ -41,6 +41,7 @@ public class GamePlayModel extends Observable {
     private final GameMode gameMode;
     private final Integer myPlayerId;
     private String hostAddress;
+    private Boolean isHost;
 
     private Integer numPlayers;
     private Integer curPlayer;
@@ -74,7 +75,7 @@ public class GamePlayModel extends Observable {
         if (gameMode.equals(GameMode.MULTI_PLAYER)){
             numPlayers = 2;
             level = AI.LEVEL.EASY;
-            boolean isHost = bundle.getBoolean(HOST_KEY);
+            isHost = bundle.getBoolean(HOST_KEY);
             // Because we only support 2 players now
             // assign 0 to host, 1 if not
             myPlayerId = isHost ? 0 : 1;
@@ -82,7 +83,7 @@ public class GamePlayModel extends Observable {
             if (!isHost){
                 hostAddress = bundle.getString(LobbyActivity.EXTRA_DEVICE_ADDRESS);
             }
-            establishBltConn(context, isHost);
+            establishBltConn(context);
         }
         else{
             bluetoothService = null;
@@ -100,11 +101,12 @@ public class GamePlayModel extends Observable {
         return myPlayerId.equals(curPlayer);
     }
     public Boolean isGameOver() { return board.isGameOver(); }
+    public Boolean getIsHost() { return isHost; }
     public Piece[] getWinningPattern() { return board.getWinningPattern(); }
     public Piece getLastPlacedPiece() { return board.getLastPlacedPiece(); }
 
     // This function should be called when GamePlayActivity is opened again
-    public void establishBltConn(Context context, boolean isHost){
+    private void establishBltConn(Context context){
         bluetoothService = new BluetoothService(context, handler);
         if (isHost) bluetoothService.start();  // start accept threads in bluetoothService
         else {

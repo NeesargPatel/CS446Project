@@ -155,7 +155,7 @@ public class BluetoothService {
      */
     public synchronized void connected(BluetoothSocket socket, BluetoothDevice
             device, final String socketType) {
-        Log.d(TAG, "connected, Socket Type:" + socketType);
+        Log.d(TAG, " connected, Socket Type: " + socketType);
 
         // Cancel the thread that completed the connection
         if (mConnectThread != null) {
@@ -355,11 +355,11 @@ public class BluetoothService {
         }
 
         public void cancel() {
-            Log.d(TAG, "Socket Type" + mSocketType + "cancel " + this);
+            Log.d(TAG, "Socket Type " + mSocketType + " cancel " + this);
             try {
                 mmServerSocket.close();
             } catch (IOException e) {
-                Log.e(TAG, "Socket Type" + mSocketType + "close() of server failed", e);
+                Log.e(TAG, "Socket Type " + mSocketType + " close() of server failed", e);
             }
         }
     }
@@ -456,8 +456,14 @@ public class BluetoothService {
 
             // Get the BluetoothSocket input and output streams
             try {
-                tmpIn = new ObjectInputStream(socket.getInputStream());
+                // The constructor of ObjectInputStream will block
+                // until the corresponding ObjectOutputStream (the other side connected by the socket)
+                // has written and flushed the header.
+                // Hence, I instantiate ObjectOutputStream first and flush() at both sides
+                // to avoid deadlock
                 tmpOut = new ObjectOutputStream(socket.getOutputStream());
+                tmpOut.flush();
+                tmpIn = new ObjectInputStream(socket.getInputStream());
             } catch (IOException e) {
                 Log.e(TAG, "temp sockets not created", e);
             }
@@ -468,7 +474,7 @@ public class BluetoothService {
         }
 
         public void run() {
-            Log.i(TAG, "BEGIN mConnectedThread");
+            Log.i(TAG, " BEGIN mConnectedThread");
             Object o;
 
             // Keep listening to the InputStream while connected
@@ -479,7 +485,7 @@ public class BluetoothService {
                     // Send the received object to the UI Activity
                     mHandler.obtainMessage(2, o).sendToTarget();
                 } catch (IOException e) {
-                    Log.e(TAG, "disconnected", e);
+                    Log.e(TAG, " disconnected", e);
                     connectionLost();
                     break;
                 }
@@ -500,7 +506,7 @@ public class BluetoothService {
                 // Share the sent message back to the UI Activity
                 mHandler.obtainMessage(3, o).sendToTarget();
             } catch (IOException e) {
-                Log.e(TAG, "Exception during write", e);
+                Log.e(TAG, " Exception during write", e);
             }
         }
 
@@ -508,7 +514,7 @@ public class BluetoothService {
             try {
                 mmSocket.close();
             } catch (IOException e) {
-                Log.e(TAG, "close() of connect socket failed", e);
+                Log.e(TAG, " close() of connect socket failed", e);
             }
         }
     }
