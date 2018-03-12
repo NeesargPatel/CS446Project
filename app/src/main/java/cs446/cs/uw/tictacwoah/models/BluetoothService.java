@@ -53,6 +53,8 @@ public class BluetoothService {
     public static final int STATE_CONNECTING = 2; // now initiating an outgoing connection
     public static final int STATE_CONNECTED = 3;  // now connected to a remote device
 
+    public static final int FROM_OTHER_DEVICES = 2;
+
     /**
      * Constructor. Prepares a new BluetoothChat session.
      *
@@ -483,7 +485,7 @@ public class BluetoothService {
                     // Read from the InputStream
                     o = mmInStream.readObject();
                     // Send the received object to the UI Activity
-                    mHandler.obtainMessage(2, o).sendToTarget();
+                    mHandler.obtainMessage(FROM_OTHER_DEVICES, o).sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, " disconnected", e);
                     connectionLost();

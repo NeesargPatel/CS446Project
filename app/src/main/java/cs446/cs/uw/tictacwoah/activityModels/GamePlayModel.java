@@ -49,20 +49,29 @@ public class GamePlayModel extends Observable {
     private AI.LEVEL level;
 
     private BluetoothService bluetoothService;
-    private final Handler handler = new Handler() {
+    private final Handler handler = new GameHandler(this);
+    // use a static class because we don't need access to private members
+    // of the enclosing class (GamePlayModel)
+    private static class GameHandler extends Handler {
+        private final GamePlayModel model;
+
+        private GameHandler(GamePlayModel model){
+            this.model = model;
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 // when the blue tooth socket receives messages from other players
-                case 2:
+                case BluetoothService.FROM_OTHER_DEVICES:
                     Piece piece = (Piece) msg.obj;
-                    placePiece(piece);
+                    model.placePiece(piece);
                     break;
                 default:
                     // we should not run into this block
             }
         }
-    };
+    }
 
     // the intent passed to start GamePlayActivity
     public GamePlayModel(Intent intent, Context context){
@@ -180,7 +189,7 @@ public class GamePlayModel extends Observable {
     private void AIPlacePieces(){
         // while it's not the turn of human player and nobody has won
         while (!curPlayer.equals(myPlayerId) && !board.isGameOver()){
-            placePiece(AI.choosePos(board, curPlayer, AI.LEVEL.EASY));
+            placePiece(AI.choosePos(board, curPlayer, level));
         }
     }
 }
