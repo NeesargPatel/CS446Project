@@ -118,8 +118,8 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
         restartButton = new Button(this);
         restartButton.setText(initialButtonText);
-        //restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
-        restartButton.setY(0);
+        restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
+//        restartButton.setY(0);
         layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
