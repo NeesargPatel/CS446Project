@@ -20,13 +20,13 @@ import java.util.Observable;
 import java.util.Observer;
 
 import cs446.cs.uw.tictacwoah.R;
-import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
+import cs446.cs.uw.tictacwoah.activityModels.GameModel;
+import cs446.cs.uw.tictacwoah.activityModels.ServerGameModel;
 import cs446.cs.uw.tictacwoah.models.Board;
 import cs446.cs.uw.tictacwoah.models.Piece;
-import cs446.cs.uw.tictacwoah.models.Setting;
 import cs446.cs.uw.tictacwoah.views.BoardView;
-import cs446.cs.uw.tictacwoah.views.PieceView;
-import cs446.cs.uw.tictacwoah.views.TurnIndicator;
+import cs446.cs.uw.tictacwoah.views.piece.PieceView;
+import cs446.cs.uw.tictacwoah.views.piece.TurnIndicator;
 
 public class GamePlayActivity extends AppCompatActivity implements Observer{
 
@@ -39,11 +39,11 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     private final CharSequence initialButtonText = "Start";
     private final CharSequence reStartButtonText = "Restart";
 
-    private GamePlayModel model;
+    private GameModel model;
     private Piece lastPlacedPiece;
     private Integer curPlayer;
+    private boolean gameOver;
     private CountDownTimer countDownTimer;
-    private Setting setting;
 
     private RelativeLayout rootLayout;
     private BoardView boardView;
@@ -69,13 +69,17 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         );
 
-        setting = (Setting) getIntent().getExtras().getSerializable(Setting.SETTING_KEY);
+        Bundle bundle = getIntent().getExtras();
+        GameModel.GameMode gameMode = (GameModel.GameMode) bundle.getSerializable(GameModel.GAME_MODE_KEY);
+        Boolean isHost = bundle.getBoolean(GameModel.HOST_KEY);
+        model = GameModel.getInstance(gameMode, isHost);
 
-        model = new GamePlayModel(getIntent(), getApplicationContext());
+        assert model != null;
         model.addObserver(this);
+        gameOver = true;
         lastPlacedPiece = null;
         curPlayer = null;
-        countDownTimer = new CountDownTimer(setting.getTimeLimit() * MILLIS_PER_SECOND, MILLIS_PER_SECOND) {
+        countDownTimer = new CountDownTimer(model.getSetting().getTimeLimit() * MILLIS_PER_SECOND, MILLIS_PER_SECOND) {
             @Override
             public void onTick(long millisUntilFinished) {
                 long secondsUntilFinished = millisUntilFinished / MILLIS_PER_SECOND;
@@ -113,9 +117,9 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         rootLayout.addView(boardView);
 
         restartButton = new Button(this);
-
         restartButton.setText(initialButtonText);
-        restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
+        //restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
+        restartButton.setY(0);
         layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -125,10 +129,11 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                newGame();
+                model.newGame();
             }
         });
         rootLayout.addView(restartButton);
+        if (!model.hasRightToStartGame()) restartButton.setVisibility(View.GONE);
 
         createDraggablePieces();
 
@@ -139,7 +144,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
         countdownTextView = new TextView(this);
         countdownTextView.setTextSize(TEXT_SIZE);
-        countdownTextView.setText(String.format(Locale.CANADA, "%d", setting.getTimeLimit()));
+        countdownTextView.setText(String.format(Locale.CANADA, "%d", model.getSetting().getTimeLimit()));
         countdownTextView.setX(boardView.getCellWidth() * Board.SIZE - TEXT_MARGIN_RIGHT);
         countdownTextView.setY(TEXT_MARGIN_TOP);
         layoutParams = new RelativeLayout.LayoutParams(
@@ -149,17 +154,21 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         countdownTextView.setLayoutParams(layoutParams);
         rootLayout.addView(countdownTextView);
 
-        // We should start a new game when the host starts the game
-        // need refactor in the future
-        if (!model.getIsHost()){
-            newGame();
+        if (model instanceof ServerGameModel){
+            ((ServerGameModel)(model)).startListening();
         }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        model.closeBltConn();
+        model.reset();
+        // If the user presses the back button, and we let it continue to countdown
+        // in onFinish(), it will invoke model.isMyTurn(),
+        // and in isMyTurn(), equals() will be invoked on model.curPlayer,
+        // but model.curPlayerId has been set to null in model.reset(),
+        // so this app will crash
+        countDownTimer.cancel();
     }
 
     private void createDraggablePieces(){
@@ -172,7 +181,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                 float x = cellWidth * i + offset;
                 float y = boardView.MARGIN_TOP + cellWidth * Board.SIZE + offset;
                 PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
-                        PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], setting.getShape());
+                        PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], model.getSetting().getShape());
                 rootLayout.addView(view);
 
                 final int sizeId = i;
@@ -258,13 +267,12 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                 }
             }
         }
-        countdownTextView.setText(String.format(Locale.CANADA, "%d", setting.getTimeLimit()));
+        countdownTextView.setText(String.format(Locale.CANADA, "%d", model.getSetting().getTimeLimit()));
         lastPlacedPiece = null;
         // we have to set it to null before invoke reset() on model
         // because model will then notify this Activity to update
         // and in update(), curPlayer will be compared to model.getCurPlayer()
         curPlayer = null;
-        model.reset();
         countDownTimer.start();
     }
 
@@ -274,30 +282,36 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         // when number of players increase
         inflateTurnIndicators();
 
-        Piece piece = model.getLastPlacedPiece();
-        if (piece != null && lastPlacedPiece != piece){
-            drawPieceOnBoard(piece);
-            lastPlacedPiece = piece;
-            countDownTimer.start();
-        }
+        if (model.isGaming()){
+            if (gameOver){
+                gameOver = false;
+                newGame();
+            }
 
+            Piece piece = model.getLastPlacedPiece();
+            if (piece != null && lastPlacedPiece != piece){
+                drawPieceOnBoard(piece);
+                lastPlacedPiece = piece;
+            }
+
+            // because curPlay may have not been initialized (null)
+            // so I invoke equals() on model.getCurPlayer()
+            if (!model.getCurPlayer().equals(curPlayer)){
+                changeTurn();
+                countDownTimer.start();
+            }
+        }
         // check if game is over and show the winning pattern
-        if (model.isGameOver()){
+        else if (model.isGameOver()){
             turnIndicators.get(curPlayer).stopAnimation();
             countDownTimer.cancel();
             showWinningPattern(model.getWinningPattern());
             showWinOrLoseMessage(model.getWinningPattern()[0].getId());
             restartButton.setText(reStartButtonText);
-            restartButton.setVisibility(View.VISIBLE);
+            if (model.hasRightToStartGame()) restartButton.setVisibility(View.VISIBLE);
+            gameOver = true;
         }
-        // Only when the game is not over should we need to change the turn
-        else {
-            // because curPlay may have not been initialized (null)
-            // so I invoke equals() on model.getCurPlayer()
-            if (!model.getCurPlayer().equals(curPlayer)){
-                changeTurn();
-            }
-        }
+        // else the game has not started
     }
 
     private void inflateTurnIndicators(){
@@ -334,7 +348,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         float y = boardView.MARGIN_TOP + cellWidth * colId + offset;
 
         PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
-                PieceView.SIZES[sizeId], PieceView.COLORS[piece.getId()], setting.getShape());
+                PieceView.SIZES[sizeId], PieceView.COLORS[piece.getId()], model.getSetting().getShape());
         rootLayout.addView(view);
         boardPieces[sizeId][rowId][colId] = view;
     }

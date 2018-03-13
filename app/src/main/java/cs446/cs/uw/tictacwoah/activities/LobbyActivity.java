@@ -17,6 +17,7 @@
 package cs446.cs.uw.tictacwoah.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -33,10 +34,14 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 import cs446.cs.uw.tictacwoah.R;
-import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
+import cs446.cs.uw.tictacwoah.activityModels.ClientGameModel;
+import cs446.cs.uw.tictacwoah.activityModels.GameModel;
+import cs446.cs.uw.tictacwoah.activityModels.ServerGameModel;
 import cs446.cs.uw.tictacwoah.models.Setting;
 
 /**
@@ -45,17 +50,12 @@ import cs446.cs.uw.tictacwoah.models.Setting;
  * by the user, the MAC address of the device is sent back to the parent
  * Activity in the result Intent.
  */
-public class LobbyActivity extends Activity {
+public class LobbyActivity extends Activity implements Observer{
 
     /**
      * Tag for Log
      */
     private static final String TAG = "DeviceListActivity";
-
-    /**
-     * Return Intent extra
-     */
-    public static String EXTRA_DEVICE_ADDRESS = "device_address";
 
     /**
      * Member fields
@@ -66,6 +66,8 @@ public class LobbyActivity extends Activity {
      * Newly discovered devices
      */
     private ArrayAdapter<String> mNewDevicesArrayAdapter;
+
+    private ProgressDialog progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +155,33 @@ public class LobbyActivity extends Activity {
     }
 
     /**
+     *
+     * @param observable this should be ClientGameModel
+     * @param object
+     *
+     * When the model receives settings and is assigned a player id from the host,
+     * this method will be called to start the GameActivity
+     */
+    @Override
+    public void update(Observable observable, Object object){
+        // at this point, the model should have been initialized
+        progress.dismiss();
+
+        // detach this Activity first
+        observable.deleteObserver(this);
+
+        Intent intent = new Intent(getApplicationContext(), GamePlayActivity.class);
+        intent.putExtra(GameModel.GAME_MODE_KEY, GameModel.GameMode.MULTI_PLAYER);
+        // The fact that we're in this Activity means the user is not the host
+        intent.putExtra(GameModel.HOST_KEY, false);
+        startActivity(intent);
+
+        // Set result and finish this Activity
+        setResult(Activity.RESULT_OK);
+        finish();
+    }
+
+    /**
      * Start device discover with the BluetoothAdapter
      */
     private void doDiscovery() {
@@ -187,24 +216,16 @@ public class LobbyActivity extends Activity {
             String info = ((TextView) v).getText().toString();
             String address = info.substring(info.length() - 17);
 
+            ClientGameModel model =
+                    (ClientGameModel) GameModel.getInstance(GameModel.GameMode.MULTI_PLAYER, false);
+            model.addObserver(LobbyActivity.this);
+            model.connect(address);
 
-            Intent intent = new Intent(getApplicationContext(), GamePlayActivity.class);
-            intent.putExtra(EXTRA_DEVICE_ADDRESS, address);
-            intent.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.GameMode.MULTI_PLAYER);
-            // The fact that we're in this Activity means the user is not the host
-            intent.putExtra(GamePlayModel.HOST_KEY, false);
-
-            /**
-                        * We should receive a Setting object from the host before invoking startActivity(),
-                        * and I just put a Setting object for now to avoid crashing.
-                        * We need to refactor it later on.
-                        */
-            intent.putExtra(Setting.SETTING_KEY, new Setting());
-
-            startActivity(intent);
-            // Set result and finish this Activity
-            setResult(Activity.RESULT_OK);
-            finish();
+            progress = new ProgressDialog(LobbyActivity.this);
+            progress.setTitle("Connecting");
+            progress.setMessage("Connecting to the host...");
+            progress.setCancelable(false); // disable dismiss by tapping outside of the dialog
+            progress.show();
         }
     };
 
@@ -236,5 +257,4 @@ public class LobbyActivity extends Activity {
             }
         }
     };
-
 }

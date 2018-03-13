@@ -49,6 +49,7 @@
         android:paddingTop="@dimen/padding_between_spinner_group" >
 
         <TextView
+            android:id="@+id/text_view_AI_level"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/padding_between_spinner_and_text"
@@ -68,6 +69,7 @@
         android:paddingTop="@dimen/padding_between_spinner_group" >
 
         <TextView
+            android:id="@+id/text_view_number_of_AI"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/padding_between_spinner_and_text"

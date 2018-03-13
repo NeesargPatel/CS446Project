@@ -1,9 +1,8 @@
-package cs446.cs.uw.tictacwoah.views;
+package cs446.cs.uw.tictacwoah.views.piece;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Path;
-import android.graphics.Rect;
 
 /**
  * Created by ASUS on 2018/3/5.

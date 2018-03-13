@@ -1,6 +1,6 @@
 package cs446.cs.uw.tictacwoah.models;
 
-import cs446.cs.uw.tictacwoah.views.PieceView;
+import cs446.cs.uw.tictacwoah.views.piece.PieceView;
 
 public class Board {
     // 3 * 3 Board

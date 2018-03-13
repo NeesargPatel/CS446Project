@@ -9,16 +9,16 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import cs446.cs.uw.tictacwoah.R;
-import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
+import cs446.cs.uw.tictacwoah.activityModels.GameModel;
 import cs446.cs.uw.tictacwoah.models.AI;
 import cs446.cs.uw.tictacwoah.models.Setting;
-import cs446.cs.uw.tictacwoah.views.PieceView;
+import cs446.cs.uw.tictacwoah.views.piece.PieceView;
 
 /**
  * Created by ASUS on 2018/3/6.
@@ -34,13 +34,15 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
     private Setting setting;
 
     private Spinner shapeSpinner, timeLimitSpinner, AILevelSpinner, numberOfAISpinner;
-    private Button playButton;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_setting);
 
         setting = new Setting();
+
+        TextView AILevelTextView = findViewById(R.id.text_view_AI_level);
+        TextView numberOfAITextView = findViewById(R.id.text_view_number_of_AI);
 
         shapeSpinner = findViewById(R.id.spinner_shape);
         timeLimitSpinner = findViewById(R.id.spinner_time_limit);
@@ -52,7 +54,7 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         numberOfAISpinner.setOnItemSelectedListener(this);
         inflateSpinners();
 
-        playButton = findViewById(R.id.play_button);
+        Button playButton = findViewById(R.id.play_button);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -60,9 +62,11 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
             }
         });
 
-        GamePlayModel.GameMode gameMode = (GamePlayModel.GameMode)
-                getIntent().getExtras().getSerializable(GamePlayModel.GAME_MODE_KEY);
-        if (gameMode.equals(GamePlayModel.GameMode.MULTI_PLAYER)){
+        GameModel.GameMode gameMode = (GameModel.GameMode)
+                getIntent().getExtras().getSerializable(GameModel.GAME_MODE_KEY);
+        if (gameMode.equals(GameModel.GameMode.MULTI_PLAYER)){
+            AILevelTextView.setVisibility(View.GONE);
+            numberOfAITextView.setVisibility(View.GONE);
             AILevelSpinner.setVisibility(View.GONE);
             numberOfAISpinner.setVisibility(View.GONE);
         }
@@ -102,8 +106,8 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         setSpinnerArrayAndSelectDefaultOption(shapeSpinner, spinnerArray, Setting.defulatShape.toString());
 
         spinnerArray = new ArrayList<>();
-        int interval = GamePlayModel.TIME_LIMIT_INTERVAL;
-        int max = GamePlayModel.MAX_TIME_LIMIT;
+        int interval = GameModel.TIME_LIMIT_INTERVAL;
+        int max = GameModel.MAX_TIME_LIMIT;
         for (int i = interval; i <= max; i += interval){
             spinnerArray.add(Integer.toString(i));
         }
@@ -116,7 +120,7 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         setSpinnerArrayAndSelectDefaultOption(AILevelSpinner, spinnerArray, Setting.defaultAILevel.toString());
 
         spinnerArray = new ArrayList<>();
-        for (int i = 1; i <= GamePlayModel.MAX_AI_PLAYERS; ++i){
+        for (int i = 1; i <= GameModel.MAX_AI_PLAYERS; ++i){
             spinnerArray.add(Integer.toString(i));
         }
         setSpinnerArrayAndSelectDefaultOption(numberOfAISpinner, spinnerArray, Integer.toString(Setting.defaultNumAIs));
@@ -132,13 +136,20 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
 
     private void onClickPlayButton(){
         Intent intent = new Intent(this, GamePlayActivity.class);
-        intent.putExtra(Setting.SETTING_KEY, setting);
-        GamePlayModel.GameMode gameMode = (GamePlayModel.GameMode)
-                getIntent().getExtras().getSerializable(GamePlayModel.GAME_MODE_KEY);
-        intent.putExtra(GamePlayModel.GAME_MODE_KEY, gameMode);
-        if (gameMode.equals(GamePlayModel.GameMode.MULTI_PLAYER)){
-            intent.putExtra(GamePlayModel.HOST_KEY, true);  // Only the host will be in this Activity
+
+        GameModel.GameMode gameMode = (GameModel.GameMode)
+                getIntent().getExtras().getSerializable(GameModel.GAME_MODE_KEY);
+        intent.putExtra(GameModel.GAME_MODE_KEY, gameMode);
+
+        GameModel model;  // The model we're going to use in this game
+        if (gameMode.equals(GameModel.GameMode.MULTI_PLAYER)){
+            intent.putExtra(GameModel.HOST_KEY, true);  // Only the host will be in this Activity
+            model = GameModel.getInstance(gameMode, true);
+        } else {  // single mode
+            model = GameModel.getInstance(gameMode, null);
         }
+        model.init(setting);
+
         startActivity(intent);
         // Set result and finish this Activity
         setResult(Activity.RESULT_OK);

@@ -1,9 +1,8 @@
-package cs446.cs.uw.tictacwoah.views;
+package cs446.cs.uw.tictacwoah.views.piece;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.view.View;
 import android.view.animation.Animation;

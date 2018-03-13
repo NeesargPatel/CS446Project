@@ -1,4 +1,4 @@
-package cs446.cs.uw.tictacwoah.views;
+package cs446.cs.uw.tictacwoah.views.piece;
 
 import android.content.Context;
 import android.graphics.Canvas;

@@ -3,7 +3,7 @@ package cs446.cs.uw.tictacwoah.models;
 import java.io.Serializable;
 
 import cs446.cs.uw.tictacwoah.activities.SettingActivity;
-import cs446.cs.uw.tictacwoah.views.PieceView;
+import cs446.cs.uw.tictacwoah.views.piece.PieceView;
 
 /**
  * Created by ASUS on 2018/3/6.
