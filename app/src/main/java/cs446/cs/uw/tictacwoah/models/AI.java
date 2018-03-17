@@ -3,8 +3,27 @@ import java.util.Random;
 
 public class AI {
 
+    public enum LEVEL{
+        EASY,
+        MEDIUM,
+        DIFFICULT
+    }
+
     // for now randomly choose an empty cell
-    public static Piece choosePos(Board board, Integer playerId){
+    public static Piece choosePos(Board board, Integer playerId, LEVEL level){
+        switch (level){
+            case EASY:
+                return random(board, playerId);
+            case MEDIUM:
+                return null;
+            case DIFFICULT:
+                return null;
+            default:
+                return null;
+        }
+    }
+
+    private static Piece random(Board board, Integer playerId){
         Integer numEmptyCells = board.getNumEmptyCells();
         Random random = new Random();
         Integer choice = random.nextInt(numEmptyCells);

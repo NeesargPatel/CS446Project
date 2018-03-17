@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.Button;
 
 import cs446.cs.uw.tictacwoah.R;
-import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
+import cs446.cs.uw.tictacwoah.activityModels.GameModel;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -44,13 +44,14 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void onSingleBtn(View view) {
-        Intent singlePlayer = new Intent(this, GamePlayActivity.class);
-        singlePlayer.putExtra(GamePlayModel.GAME_MODE_KEY, GamePlayModel.SINGLE_MODE);
+        Intent singlePlayer = new Intent(this, SettingActivity.class);
+        singlePlayer.putExtra(GameModel.GAME_MODE_KEY, GameModel.GameMode.SINGLE);
         startActivity(singlePlayer);
     }
 
     public void onBlueBtn(View view) {
         Intent bluetooth = new Intent(this, BluetoothActivity.class);
+        bluetooth.putExtra(GameModel.GAME_MODE_KEY, GameModel.GameMode.MULTI_PLAYER);
         startActivity(bluetooth);
     }
 }

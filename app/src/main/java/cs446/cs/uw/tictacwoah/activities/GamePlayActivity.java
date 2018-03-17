@@ -1,47 +1,59 @@
 package cs446.cs.uw.tictacwoah.activities;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.graphics.drawable.Drawable;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Observable;
 import java.util.Observer;
 
 import cs446.cs.uw.tictacwoah.R;
-import cs446.cs.uw.tictacwoah.activityModels.GamePlayModel;
+import cs446.cs.uw.tictacwoah.activityModels.GameModel;
+import cs446.cs.uw.tictacwoah.activityModels.ServerGameModel;
+import cs446.cs.uw.tictacwoah.models.Board;
 import cs446.cs.uw.tictacwoah.models.Piece;
-
-import static cs446.cs.uw.tictacwoah.R.id.board;
+import cs446.cs.uw.tictacwoah.views.BoardView;
+import cs446.cs.uw.tictacwoah.views.piece.PieceView;
+import cs446.cs.uw.tictacwoah.views.piece.TurnIndicator;
 
 public class GamePlayActivity extends AppCompatActivity implements Observer{
 
-    private GamePlayModel model;
+    // margin between TurnIndicators
+    private final int marginTI = TurnIndicator.WIDTH;
+    private final int WARNING_TIME = 5;
+    private final int MILLIS_PER_SECOND = 1000;
+    private final int TEXT_SIZE = 40, TEXT_MARGIN_TOP = 50, TEXT_MARGIN_RIGHT = 200;
+
+    private final CharSequence initialButtonText = "Start";
+    private final CharSequence reStartButtonText = "Restart";
+
+    private GameModel model;
+    private Piece lastPlacedPiece;
+    private Integer curPlayer;
+    private boolean gameOver;
+    private CountDownTimer countDownTimer;
 
     private RelativeLayout rootLayout;
     private BoardView boardView;
     private Button restartButton;
 
-    private Drawable[] drawables;
-    private int[] pieceSizes;
-    float widthOfSquare;
-
-    private List<View> boardPieces;  // clear these views for a new game
+    private PieceView[][][] boardPieces;
+    private List<TurnIndicator> turnIndicators;
+    private TextView countdownTextView;
 
     // for dragging pieces
-    private int lastAction;
     private float origX, origY, dX, dY;
 
     @Override
@@ -57,130 +69,176 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
         );
 
-        model = new GamePlayModel(getIntent(), getApplicationContext());
+        Bundle bundle = getIntent().getExtras();
+        GameModel.GameMode gameMode = (GameModel.GameMode) bundle.getSerializable(GameModel.GAME_MODE_KEY);
+        Boolean isHost = bundle.getBoolean(GameModel.HOST_KEY);
+        model = GameModel.getInstance(gameMode, isHost);
+
+        assert model != null;
         model.addObserver(this);
+        gameOver = true;
+        lastPlacedPiece = null;
+        curPlayer = null;
+        countDownTimer = new CountDownTimer(model.getSetting().getTimeLimit() * MILLIS_PER_SECOND, MILLIS_PER_SECOND) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                long secondsUntilFinished = millisUntilFinished / MILLIS_PER_SECOND;
+                if (secondsUntilFinished <= WARNING_TIME){
+                    countdownTextView.setTextColor(Color.RED);
+                }
+                else {
+                    countdownTextView.setTextColor(Color.BLACK);
+                }
+                String text = String.format(Locale.CANADA, "%d", secondsUntilFinished);
+                countdownTextView.setText(text);
+            }
+
+            @Override
+            public void onFinish() {
+                countdownTextView.setText("0");
+                if (model.isMyTurn()){
+                    model.AIPlacePiece();
+                }
+            }
+        };
 
         rootLayout = findViewById(R.id.thisisalayout);
-        boardView = findViewById(R.id.board);
-        restartButton = findViewById(R.id.restart_button);
 
+        int marginTop = marginTI * 2 + TurnIndicator.WIDTH;
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        float cellWidth = displayMetrics.widthPixels / Board.SIZE;
+        boardView = new BoardView(this, marginTop, cellWidth);
+        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+        );
+        boardView.setLayoutParams(layoutParams);
+        rootLayout.addView(boardView);
+
+        restartButton = new Button(this);
+        restartButton.setText(initialButtonText);
+        restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
+//        restartButton.setY(0);
+        layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        layoutParams.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        restartButton.setLayoutParams(layoutParams);
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                newGame();
+                model.newGame();
             }
         });
+        rootLayout.addView(restartButton);
+        if (!model.hasRightToStartGame()) restartButton.setVisibility(View.GONE);
 
-        drawables = new Drawable[model.getNumPlayers()];
-        drawables[0] = getResources().getDrawable(R.drawable.square_blue);
-        drawables[1] = getResources().getDrawable(R.drawable.sqaure_green);
+        createDraggablePieces();
 
-        // I don't know why I can't use array initialization here
-        pieceSizes = new int[3];
-        pieceSizes[0] = 80;
-        pieceSizes[1] = 140;
-        pieceSizes[2] = 200;
+        boardPieces = new PieceView[PieceView.SIZES.length][Board.SIZE][Board.SIZE];
 
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        widthOfSquare = displayMetrics.widthPixels / 3;
+        turnIndicators = new LinkedList<>();
+        inflateTurnIndicators();
 
-        float heightOfScreen = displayMetrics.heightPixels;
-        createDraggablePieces(heightOfScreen);
+        countdownTextView = new TextView(this);
+        countdownTextView.setTextSize(TEXT_SIZE);
+        countdownTextView.setText(String.format(Locale.CANADA, "%d", model.getSetting().getTimeLimit()));
+        countdownTextView.setX(boardView.getCellWidth() * Board.SIZE - TEXT_MARGIN_RIGHT);
+        countdownTextView.setY(TEXT_MARGIN_TOP);
+        layoutParams = new RelativeLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        countdownTextView.setLayoutParams(layoutParams);
+        rootLayout.addView(countdownTextView);
 
-        boardPieces = new LinkedList<>();
+        if (model instanceof ServerGameModel){
+            ((ServerGameModel)(model)).startListening();
+        }
     }
 
-    private void createDraggablePieces(float heightOfScreen){
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        model.reset();
+        // If the user presses the back button, and we let it continue to countdown
+        // in onFinish(), it will invoke model.isMyTurn(),
+        // and in isMyTurn(), equals() will be invoked on model.curPlayer,
+        // but model.curPlayerId has been set to null in model.reset(),
+        // so this app will crash
+        countDownTimer.cancel();
+    }
+
+    private void createDraggablePieces(){
+        float cellWidth = boardView.getCellWidth();
         // For each size, I create 2 pieces,
         // so when user drags a piece, there will still be another piece on the UI
         for (int j = 0; j < 2; ++j) {
-            for (int i = 0; i < pieceSizes.length; ++i) {
-                ImageView imageView = new ImageView(this);
-                imageView.setImageDrawable(drawables[model.getMyPlayerId()]);
+            for (int i = 0; i < PieceView.SIZES.length; ++i) {
+                float offset = (cellWidth - PieceView.SIZES[i]) / 2;
+                float x = cellWidth * i + offset;
+                float y = boardView.MARGIN_TOP + cellWidth * Board.SIZE + offset;
+                PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
+                        PieceView.SIZES[i], PieceView.COLORS[model.getMyPlayerId()], model.getSetting().getShape());
+                rootLayout.addView(view);
 
-                float offset = (widthOfSquare - pieceSizes[i]) / 2;
-                imageView.setX(widthOfSquare * i + offset);
-                imageView.setY(heightOfScreen - widthOfSquare + offset);
-
-                RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(pieceSizes[i], pieceSizes[i]);
-                imageView.setLayoutParams(layoutParams);
-                rootLayout.addView(imageView);
-
-                imageView.setOnTouchListener(new View.OnTouchListener() {
+                final int sizeId = i;
+                view.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View view, MotionEvent event) {
-                        int sizeId = -1;
-                        int xCoord = 0;
-                        int yCoord = 0;
-                        switch (event.getActionMasked()) {
+                        int curAction = event.getActionMasked();
+                        Integer rowId;
+                        Integer colId;
+                        switch (curAction) {
                             case MotionEvent.ACTION_DOWN:
                                 origX = view.getX();
                                 origY = view.getY();
+                                // view.getX() refers to the top-left point of the view
+                                // while event.getRawX() is the point where the cursor is
                                 dX = view.getX() - event.getRawX();
                                 dY = view.getY() - event.getRawY();
-                                lastAction = MotionEvent.ACTION_DOWN;
                                 break;
 
                             case MotionEvent.ACTION_MOVE:
                                 view.setY(event.getRawY() + dY);
                                 view.setX(event.getRawX() + dX);
-                                lastAction = MotionEvent.ACTION_MOVE;
                                 break;
 
                             case MotionEvent.ACTION_UP:
-                                if (getCenterYCoordinate(view) < widthOfSquare) {
-                                    view.setY(widthOfSquare / 2 - view.getWidth() / 2);
-                                    yCoord = 0;
-                                } else if (getCenterYCoordinate(view) > widthOfSquare && getCenterYCoordinate(view) < widthOfSquare * 2) {
-                                    view.setY(widthOfSquare * (float) 1.5 - view.getWidth() / 2);
-                                    yCoord = 1;
-                                } else if (getCenterYCoordinate(view) > widthOfSquare * 2 && getCenterYCoordinate(view) < widthOfSquare * 3) {
-                                    view.setY(widthOfSquare * (float) 2.5 - view.getWidth() / 2);
-                                    yCoord = 2;
-                                } else {  // if the center of this piece is not in the board
-                                    view.setX(origX);
-                                    view.setY(origY);
+                                rowId = boardView.getRowId(getCenterXCoordinate(view));
+                                colId = boardView.getColId(getCenterYCoordinate(view));
+
+                                // the view was not on the board when the user finished dragging
+                                if (rowId == null || colId == null){
                                     break;
                                 }
 
                                 // The piece is dragged onto the board, but it's not the user's turn
                                 if (!model.isMyTurn()){
-                                    view.setX(origX);
-                                    view.setY(origY);
-                                    Toast toast = Toast.makeText(getApplicationContext(), "It's not your turn", Toast.LENGTH_SHORT);
+                                    Toast toast = Toast.makeText(getApplicationContext(),
+                                            "It's not your turn", Toast.LENGTH_SHORT);
                                     toast.show();
                                     break;
                                 }
 
-                                if (getCenterXCoordinate(view) < widthOfSquare) {
-                                    view.setX(widthOfSquare / 2 - view.getWidth() / 2);
-                                    xCoord = 0;
-                                } else if (getCenterXCoordinate(view) > widthOfSquare && getCenterXCoordinate(view) < widthOfSquare * 2) {
-                                    view.setX(widthOfSquare * (float) 1.5 - view.getWidth() / 2);
-                                    xCoord = 1;
-                                } else if (getCenterXCoordinate(view) > widthOfSquare * 2) {
-                                    view.setX(widthOfSquare * (float) 2.5 - view.getWidth() / 2);
-                                    xCoord = 2;
-                                }
-
-                                // This part should be refactored
-                                int size = view.getLayoutParams().width;
-                                for (int i = 0; i < pieceSizes.length; ++i){
-                                    if (size == pieceSizes[i]) sizeId = i;
-                                }
-
-                                if (!model.placePiece(new Piece(model.getMyPlayerId(), sizeId, xCoord, yCoord))){
-                                    Toast toast = Toast.makeText(getApplicationContext(), "This space is occupied.", Toast.LENGTH_SHORT);
+                                Piece piece = new Piece(model.getMyPlayerId(), sizeId, rowId, colId);
+                                if (!model.placePiece(piece)){
+                                    Toast toast = Toast.makeText(getApplicationContext(),
+                                            "This space is occupied.", Toast.LENGTH_SHORT);
                                     toast.show();
                                 }
-
-                                view.setX(origX);
-                                view.setY(origY);
 
                                 break;
                             default:
                                 return false;
+                        }
+                        // we need to reset the position of the draggable piece
+                        // when user finished dragging
+                        if (curAction == MotionEvent.ACTION_UP){
+                            view.setX(origX);
+                            view.setY(origY);
                         }
                         return true;
                     }
@@ -190,82 +248,114 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     }
 
     private float getCenterXCoordinate (View view) {
-        return view.getX() + view.getWidth()  / 2;
+        return view.getX() + view.getWidth() / 2;
     }
 
     private float getCenterYCoordinate (View view) {
-        return view.getY() + view.getHeight()  / 2;
-    }
-
-    @Override
-    protected void onResume(){
-
-        super.onResume();
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_new_game) {
-            newGame();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-        @Override
-    public void onDestroy() {
-        super.onDestroy();
-        model.closeBltConn();
+        return view.getY() + view.getHeight() / 2;
     }
 
     private void newGame() {
         restartButton.setVisibility(View.GONE);
-        boardView.invalidate();
-        for (View v: boardPieces) rootLayout.removeView(v);
-        model.reset();
+        for (int i = 0; i < boardPieces.length; ++i){
+            for (int j = 0; j < boardPieces[i].length; ++j){
+                for (int k = 0; k < boardPieces[i][j].length; ++k){
+                    if (boardPieces[i][j][k] != null){
+                        rootLayout.removeView(boardPieces[i][j][k]);
+                        boardPieces[i][j][k] = null;
+                    }
+                }
+            }
+        }
+        countdownTextView.setText(String.format(Locale.CANADA, "%d", model.getSetting().getTimeLimit()));
+        lastPlacedPiece = null;
+        // we have to set it to null before invoke reset() on model
+        // because model will then notify this Activity to update
+        // and in update(), curPlayer will be compared to model.getCurPlayer()
+        curPlayer = null;
+        countDownTimer.start();
     }
 
     @Override
     public void update(Observable observable, Object object) {
 
-        Piece piece = model.getLastPlacedPiece();
-        drawPieceOnBoard(piece, drawables[piece.getId()]);
+        // when number of players increase
+        inflateTurnIndicators();
 
+        if (model.isGaming()){
+            if (gameOver){
+                gameOver = false;
+                newGame();
+            }
+
+            Piece piece = model.getLastPlacedPiece();
+            if (piece != null && lastPlacedPiece != piece){
+                drawPieceOnBoard(piece);
+                lastPlacedPiece = piece;
+            }
+
+            // because curPlay may have not been initialized (null)
+            // so I invoke equals() on model.getCurPlayer()
+            if (!model.getCurPlayer().equals(curPlayer)){
+                changeTurn();
+                countDownTimer.start();
+            }
+        }
         // check if game is over and show the winning pattern
-        if (model.isGameOver()){
-            drawWinningPattern(model.getWinningPattern());
+        else if (model.isGameOver()){
+            turnIndicators.get(curPlayer).stopAnimation();
+            countDownTimer.cancel();
+            showWinningPattern(model.getWinningPattern());
             showWinOrLoseMessage(model.getWinningPattern()[0].getId());
-            restartButton.setVisibility(View.VISIBLE);
+            restartButton.setText(reStartButtonText);
+            if (model.hasRightToStartGame()) restartButton.setVisibility(View.VISIBLE);
+            gameOver = true;
+        }
+        // else the game has not started
+    }
+
+    private void inflateTurnIndicators(){
+        while (turnIndicators.size() < model.getNumPlayers()){
+            int index = turnIndicators.size();  // the index of the TurnIndicator being added
+            int x = marginTI * (index + 1) + TurnIndicator.WIDTH * index;
+            int y = marginTI;
+            int color = PieceView.COLORS[index];
+            TurnIndicator turnIndicator = new TurnIndicator(this, x, y, color);
+            turnIndicators.add(turnIndicator);
+            rootLayout.addView(turnIndicator);
         }
     }
 
-    private void drawPieceOnBoard(Piece piece, Drawable drawable){
-        ImageView imageView = new ImageView(this);
-        imageView.setImageDrawable(drawable);
-
-        int sizeId = piece.getSize();
-        float offset = (widthOfSquare - pieceSizes[sizeId]) / 2;
-        imageView.setX(widthOfSquare * piece.getRowId() + offset);
-        imageView.setY(widthOfSquare * piece.getColId() + offset);
-
-        int size = pieceSizes[sizeId];
-        RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(size, size);
-        imageView.setLayoutParams(layoutParams);
-        rootLayout.addView(imageView);
-
-        boardPieces.add(imageView);
+    private void changeTurn(){
+        if (curPlayer != null){
+            // stop the animation because the turn changes
+            turnIndicators.get(curPlayer).stopAnimation();
+        }
+        // Since Integer is mutable, so we can directly use assignment operator here
+        // (assign the underlying value of model.getCurPlayer() to curPlayer)
+        curPlayer = model.getCurPlayer();
+        turnIndicators.get(curPlayer).startAnimation();
     }
 
-    private void drawWinningPattern(Piece[] pieces){
-        // use a different color to emphasize the winning pattern
-        Drawable drawable = getResources().getDrawable(R.drawable.square_red);
-        for (int i = 0; i < pieces.length; ++i){
-            drawPieceOnBoard(pieces[i], drawable);
+    private void drawPieceOnBoard(Piece piece){
+        int sizeId = piece.getSizeId();
+        int rowId = piece.getRowId();
+        int colId = piece.getColId();
+        float cellWidth = boardView.getCellWidth();
+
+        float offset = (cellWidth - PieceView.SIZES[sizeId]) / 2;
+        float x = cellWidth * rowId + offset;
+        float y = boardView.MARGIN_TOP + cellWidth * colId + offset;
+
+        PieceView view = PieceView.getPieceView(this, (int)x, (int)y,
+                PieceView.SIZES[sizeId], PieceView.COLORS[piece.getId()], model.getSetting().getShape());
+        rootLayout.addView(view);
+        boardPieces[sizeId][rowId][colId] = view;
+    }
+
+    private void showWinningPattern(Piece[] pieces){
+        for (Piece p : pieces){
+            boardPieces[p.getSizeId()][p.getRowId()][p.getColId()].startAnimation();
         }
     }
 

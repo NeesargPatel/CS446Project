@@ -25,9 +25,10 @@
         <activity
             android:name=".activities.GamePlayActivity"
             android:label="@string/title_activity_gameplay"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name=".activities.LobbyActivity" />
-        <activity android:name=".activities.BluetoothActivity"></activity>
+        <activity android:name=".activities.SettingActivity" />
+        <activity android:name=".activities.BluetoothActivity"/>
     </application>
 
 </manifest>
