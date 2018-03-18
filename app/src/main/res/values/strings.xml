@@ -28,6 +28,7 @@
         \t The final way to win is to have 3 different sized pieces in ascending or descending order
         either horizontally, vertically or diagonally. \n\n
     ]]></string>
+    <string name="help_title">GAMEPLAY HELP</string>
 
     <item type="id" name="action_next" />
 </resources>

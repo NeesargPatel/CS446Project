@@ -16,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import cs446.cs.uw.tictacwoah.R;
+import me.relex.circleindicator.CircleIndicator;
 
 /**
  * Created by vicdragon on 2018-03-17.
@@ -45,6 +46,8 @@ public class HelpActivity extends AppCompatActivity {
         pager = findViewById(R.id.help_pager);
         pageAdapter = new ScreenSlidePagerAdapter(getSupportFragmentManager(), this);
         pager.setAdapter(pageAdapter);
+        CircleIndicator indicator = (CircleIndicator) findViewById(R.id.help_indicator);
+        indicator.setViewPager(pager);
         pager.addOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {

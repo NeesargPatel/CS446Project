@@ -2,9 +2,7 @@ package cs446.cs.uw.tictacwoah.activities;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.sax.RootElement;
 import android.support.v4.app.Fragment;
-import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,9 +50,10 @@ public class HelpFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         ViewGroup view = (ViewGroup) inflater
                 .inflate(R.layout.activity_help, container, false);
-
         TextView text = view.findViewById(R.id.help_text);
+        RelativeLayout layout = view.findViewById(R.id.help_layout);
         int num = this.getPageNumber();
+
         if (num == 0)
             text.setText(R.string.help_text_page1);
         else {
@@ -65,7 +64,6 @@ public class HelpFragment extends Fragment {
                     ViewGroup.LayoutParams.MATCH_PARENT
             );
             boardView.setLayoutParams(layoutParams);
-            RelativeLayout layout = view.findViewById(R.id.help_layout);
 
             if (num == 1) {
                 text.setText(R.string.help_text_page2);
