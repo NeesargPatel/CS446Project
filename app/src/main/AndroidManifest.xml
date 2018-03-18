@@ -29,6 +29,7 @@
         <activity android:name=".activities.LobbyActivity" />
         <activity android:name=".activities.SettingActivity" />
         <activity android:name=".activities.BluetoothActivity"/>
+        <activity android:name=".activities.HelpActivity"/>
     </application>
 
 </manifest>
