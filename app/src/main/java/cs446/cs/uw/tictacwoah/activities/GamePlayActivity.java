@@ -135,7 +135,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         restartButton = new Button(this);
         restartButton.setText(initialButtonText);
         restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
-//        restartButton.setY(0);
+
         layoutParams = new RelativeLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
@@ -176,13 +176,14 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
         // Record to the external cache directory for visibility
         defaultFileName = getExternalCacheDir().getAbsolutePath();
-        defaultFileName += "/audiorecordtest.3gp";
+        defaultFileName += "/cachedAudioForSending.3gp";
 
+        // Request permissions for audio recording
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
         sendAudioButton = new RecordButton(this);
         sendAudioButton.setY(0);
         sendAudioButton.setLayoutParams(layoutParams);
-        rootLayout.addView(sendAudioButton);
+        //rootLayout.addView(sendAudioButton);
     }
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -195,6 +196,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     private boolean permissionToRecordAccepted = false;
     private String [] permissions = {Manifest.permission.RECORD_AUDIO};
 
+    // function to get permissions for audio recording
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
