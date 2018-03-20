@@ -92,6 +92,18 @@ public class ClientGameModel extends MultiPlayerGameModel {
                     else if (msg.obj instanceof Piece){
                         Piece piece = (Piece) msg.obj;
                         model.placePiece(piece);
+                    } else if (msg.obj instanceof AudioClip){
+                        Log.d("myTag", "recieved!");
+                        AudioClip audioClip = (AudioClip) msg.obj;
+                        model.playAudio(audioClip);
+                        //broadcast to all the clients except for the one who sent the audio
+                        for (int i = 0; i < model.bluetoothServices.size(); ++i) {
+                            // -1 because audioClip.getId() == 0 means host
+                            // so bluetoothServices[0] actually meas the client with playerID 1
+                            if (i != audioClip.getId() - 1) {
+                                model.bluetoothServices.get(i).write(audioClip);
+                            }
+                        }
                     }
                     break;
                 default:
