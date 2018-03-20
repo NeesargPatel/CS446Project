@@ -8,6 +8,7 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 
 import java.io.File;
@@ -107,6 +108,10 @@ public abstract class GameModel extends Observable {
     }
 
     public Boolean sendAudio(AudioClip audioClip) {
+        return true;
+    }
+
+    public Boolean playAudio(AudioClip audioClip) {
         return true;
     }
 

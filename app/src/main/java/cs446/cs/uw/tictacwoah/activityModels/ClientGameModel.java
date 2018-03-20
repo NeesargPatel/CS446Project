@@ -132,6 +132,13 @@ public class ClientGameModel extends MultiPlayerGameModel {
     }
 
     @Override
+    public Boolean playAudio (AudioClip audioClip) {
+        // TODO: play the audio clip
+        audioClip.getAudioClip();
+        return true;
+    }
+
+    @Override
     public void reset(){
         super.reset();
         if (bluetoothService != null) bluetoothService.stop();

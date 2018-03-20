@@ -177,11 +177,11 @@ public class ServerGameModel extends MultiPlayerGameModel {
     }
 
     public Boolean playAudio(AudioClip audioClip) {
-        //if (super.playAudio(audioClip)) {
             // If the audio clip was sent by myself
             if (audioClip.getId().equals(myPlayerId)) {
                 broadcast(audioClip);
             }
+
             return true;
         //}
         //return false;
