@@ -8,4 +8,27 @@
     <string name="AI_level_spinner_text">AI Level</string>
     <string name="number_of_AI_spinner_text"># AI</string>
     <string name="play_button_text">Play!</string>
+    <string name="action_previous">Previous</string>
+    <string name="action_next">Next</string>
+    <string name="action_finish">Finish</string>
+
+    <string name="help_text_page1"><![CDATA[
+        \t Tic Tac Woah is a complex and advanced game based on the famous Tic Tac Toe game. This game
+        can be played by 2-4 players. Each player gets different sized pieces like circles or
+        triangles. The sizes are small, medium and large. \n\n
+        \t There are three ways to win, scroll left to view more info on this. \n
+    ]]></string>
+    <string name="help_text_page2"><![CDATA[
+        \t One way to win is to have 3 concentric circles in the same spot. \n\n
+    ]]></string>
+    <string name="help_text_page3"><![CDATA[
+        \t Another way to win is to have 3 same sized pieces in a row or column or diagonal. \n\n
+    ]]></string>
+    <string name="help_text_page4"><![CDATA[
+        \t The final way to win is to have 3 different sized pieces in ascending or descending order
+        either horizontally, vertically or diagonally. \n\n
+    ]]></string>
+    <string name="help_title">GAMEPLAY HELP</string>
+
+    <item type="id" name="action_next" />
 </resources>

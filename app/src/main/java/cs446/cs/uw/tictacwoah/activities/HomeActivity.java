@@ -54,4 +54,8 @@ public class HomeActivity extends AppCompatActivity {
         bluetooth.putExtra(GameModel.GAME_MODE_KEY, GameModel.GameMode.MULTI_PLAYER);
         startActivity(bluetooth);
     }
+
+    public void onHelpBtn(View view) {
+        startActivity(new Intent(this, HelpActivity.class));
+    }
 }
