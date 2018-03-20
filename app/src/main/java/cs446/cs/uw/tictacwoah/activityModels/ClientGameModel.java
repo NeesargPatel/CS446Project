@@ -2,10 +2,17 @@ package cs446.cs.uw.tictacwoah.activityModels;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import cs446.cs.uw.tictacwoah.models.AudioClip;
 import cs446.cs.uw.tictacwoah.models.BluetoothService;
 import cs446.cs.uw.tictacwoah.models.Piece;
 import cs446.cs.uw.tictacwoah.models.Setting;
@@ -115,6 +122,13 @@ public class ClientGameModel extends MultiPlayerGameModel {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public Boolean sendAudio (AudioClip audioClip) {
+        Log.d("myTag", "ClientGameModel sending byte array");
+        bluetoothService.write(audioClip);
+        return true;
     }
 
     @Override

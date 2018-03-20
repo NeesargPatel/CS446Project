@@ -32,7 +32,6 @@ public class BluetoothActivity extends AppCompatActivity {
                 onClickBtn(v, true);  // host is the one that creates room
             }
         });
-
         joinButton = findViewById(R.id.join_button);
         joinButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {

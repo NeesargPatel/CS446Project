@@ -1,10 +1,18 @@
 package cs446.cs.uw.tictacwoah.activities;
 
+import android.Manifest;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +21,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +34,7 @@ import java.util.Observer;
 import cs446.cs.uw.tictacwoah.R;
 import cs446.cs.uw.tictacwoah.activityModels.GameModel;
 import cs446.cs.uw.tictacwoah.activityModels.ServerGameModel;
+import cs446.cs.uw.tictacwoah.models.AudioClip;
 import cs446.cs.uw.tictacwoah.models.Board;
 import cs446.cs.uw.tictacwoah.models.Piece;
 import cs446.cs.uw.tictacwoah.views.BoardView;
@@ -56,8 +69,11 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     // for dragging pieces
     private float origX, origY, dX, dY;
 
+    public static File cacheDir;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        cacheDir = getExternalCacheDir();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gameplay);
         getWindow().getDecorView().setSystemUiVisibility(
@@ -156,6 +172,106 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
         if (model instanceof ServerGameModel){
             ((ServerGameModel)(model)).startListening();
+        }
+
+        // Record to the external cache directory for visibility
+        defaultFileName = getExternalCacheDir().getAbsolutePath();
+        defaultFileName += "/audiorecordtest.3gp";
+
+        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+        sendAudioButton = new RecordButton(this);
+        sendAudioButton.setY(0);
+        sendAudioButton.setLayoutParams(layoutParams);
+        rootLayout.addView(sendAudioButton);
+    }
+
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+    private static String defaultFileName = null;
+
+    private RecordButton sendAudioButton = null;
+    private MediaRecorder mediaRecorder = null;
+
+    // Requesting permission to RECORD_AUDIO
+    private boolean permissionToRecordAccepted = false;
+    private String [] permissions = {Manifest.permission.RECORD_AUDIO};
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode){
+            case REQUEST_RECORD_AUDIO_PERMISSION:
+                permissionToRecordAccepted  = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                break;
+        }
+        if (!permissionToRecordAccepted ) finish();
+
+    }
+
+    private void onRecord(boolean start) {
+        if (start) {
+            startRecording();
+        } else {
+            stopRecording();
+        }
+    }
+
+    private void startRecording() {
+        mediaRecorder = new MediaRecorder();
+        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mediaRecorder.setOutputFile(defaultFileName);
+        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+
+        try {
+            mediaRecorder.prepare();
+        } catch (IOException e) {
+            Log.e("myTag", "prepare() failed");
+        }
+
+        mediaRecorder.start();
+    }
+
+    private void stopRecording() {
+        mediaRecorder.stop();
+        mediaRecorder.release();
+        mediaRecorder = null;
+        File file = new File(defaultFileName);
+        byte[] b = new byte[(int) file.length()];
+        try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            fileInputStream.read(b);
+            Log.d("myTag","sending mPlayer");
+            AudioClip audioClipForSending = new AudioClip(model.getMyPlayerId(),b);
+            model.sendAudio(audioClipForSending);
+        } catch (FileNotFoundException e) {
+            System.out.println("File Not Found.");
+            e.printStackTrace();
+        }
+        catch (IOException e1) {
+            System.out.println("Error Reading The File.");
+            e1.printStackTrace();
+        }
+    }
+
+    class RecordButton extends android.support.v7.widget.AppCompatButton {
+        boolean mStartRecording = true;
+
+        OnClickListener clicker = new OnClickListener() {
+            public void onClick(View v) {
+                onRecord(mStartRecording);
+                if (mStartRecording) {
+                    setText("Stop recording");
+                } else {
+                    setText("Start recording");
+                }
+                mStartRecording = !mStartRecording;
+            }
+        };
+
+        public RecordButton(Context ctx) {
+            super(ctx);
+            setText("Start recording");
+            setOnClickListener(clicker);
         }
     }
 

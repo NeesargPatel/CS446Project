@@ -4,15 +4,21 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Observable;
 
 import cs446.cs.uw.tictacwoah.activities.LobbyActivity;
 import cs446.cs.uw.tictacwoah.models.AI;
+import cs446.cs.uw.tictacwoah.models.AudioClip;
 import cs446.cs.uw.tictacwoah.models.BluetoothService;
 import cs446.cs.uw.tictacwoah.models.Board;
 import cs446.cs.uw.tictacwoah.models.Piece;
@@ -98,6 +104,10 @@ public abstract class GameModel extends Observable {
         curPlayer = null;
         numPlayers = null;
         deleteObservers();
+    }
+
+    public Boolean sendAudio(AudioClip audioClip) {
+        return true;
     }
 
     public Boolean placePiece(Piece piece){

@@ -2,17 +2,25 @@ package cs446.cs.uw.tictacwoah.activityModels;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.util.Log;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import cs446.cs.uw.tictacwoah.activities.BluetoothActivity;
+import cs446.cs.uw.tictacwoah.models.AudioClip;
 import cs446.cs.uw.tictacwoah.models.BluetoothService;
 import cs446.cs.uw.tictacwoah.models.Piece;
 import cs446.cs.uw.tictacwoah.models.Setting;
+import cs446.cs.uw.tictacwoah.activities.GamePlayActivity;
 
 /**
  * Created by ASUS on 2018/3/12.
@@ -37,9 +45,10 @@ public class ServerGameModel extends MultiPlayerGameModel {
 
         @Override
         public void handleMessage(Message msg) {
-            Log.d(TAG, Integer.toString(msg.arg1));
+            Log.d("myTag", Integer.toString(msg.arg1));
             switch (msg.what) {
                 case BluetoothService.ACCEPT_FAILED:
+                    Log.d("myTag","there was an error");
 //                    if (!model.isGaming()){
 //                        int i = msg.arg1;
 //                        if (model.bluetoothServices.size() > i){
@@ -53,7 +62,10 @@ public class ServerGameModel extends MultiPlayerGameModel {
 //                        }
 //                    }
                 case BluetoothService.FROM_OTHER_DEVICES:
+                    Log.d("myTag", "inside FROM_OTHER_DEVICES");
+
                     if (msg.obj instanceof GameMessage){
+                        Log.d("myTag", "inside instanceof GameMessage");
                         GameMessage gameMessage = (GameMessage) msg.obj;
                         GameMessage.Type type = gameMessage.getType();
                         if (type.equals(GameMessage.Type.REQUEST)){
@@ -76,8 +88,8 @@ public class ServerGameModel extends MultiPlayerGameModel {
 
                             if (model.getNumPlayers() < GameModel.MAX_PLAYERS) model.addNewSession();
                         }
-                    }
-                    else if (msg.obj instanceof Piece){
+                    } else if (msg.obj instanceof Piece){
+                        Log.d("myTag", "inside instanceof Piece");
                         Piece piece = (Piece) msg.obj;
                         model.placePiece(piece);
                         // broadcast to all the clients except for the one who placed this piece
@@ -88,9 +100,29 @@ public class ServerGameModel extends MultiPlayerGameModel {
                                 model.bluetoothServices.get(i).write(piece);
                             }
                         }
+                    } else if (msg.obj instanceof AudioClip){
+                        Log.d("myTag", "recieved!");
+                        AudioClip audioClip = (AudioClip) msg.obj;
+                        model.playAudio(audioClip);
+                        //broadcast to all the clients except for the one who sent the audio
+                        for (int i = 0; i < model.bluetoothServices.size(); ++i) {
+                            // -1 because audioClip.getId() == 0 means host
+                            // so bluetoothServices[0] actually meas the client with playerID 1
+                            if (i != audioClip.getId() - 1) {
+                                model.bluetoothServices.get(i).write(audioClip);
+                            }
+                        }
+                    } else {
+                        Log.d("myTag", "shouldnt get here");
                     }
                     break;
                 default:
+                    Log.d("myTag", "defaulted");
+                    if (msg.obj instanceof MediaPlayer) {
+                        Log.d("myTag", "GREAT");
+                        MediaPlayer mPlayer = (MediaPlayer) msg.obj;
+                        mPlayer.start();
+                    }
                     // we should not run into this block
             }
         }
@@ -142,6 +174,34 @@ public class ServerGameModel extends MultiPlayerGameModel {
             return true;
         }
         return false;
+    }
+
+    public Boolean playAudio(AudioClip audioClip) {
+        //if (super.playAudio(audioClip)) {
+            // If the audio clip was sent by myself
+            if (audioClip.getId().equals(myPlayerId)) {
+                broadcast(audioClip);
+            }
+            return true;
+        //}
+        //return false;
+        /**
+        byte[] audioFile = (byte[]) msg.obj;
+        try {
+            String mFileName = GamePlayActivity.cacheDir.getAbsolutePath();
+            mFileName += "/audiorecordtest.3gp";
+            FileOutputStream out = new FileOutputStream(mFileName);
+            out.write(audioFile);
+            out.close();
+            MediaPlayer mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(mFileName);
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+
+        } catch (IOException e) {
+
+        }
+         **/
     }
 
     public void startListening(){
