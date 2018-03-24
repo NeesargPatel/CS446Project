@@ -48,18 +48,15 @@ public class ClientGameModel extends MultiPlayerGameModel {
             switch (msg.what) {
                 // keep trying connecting to the host
                 case BluetoothService.CONNECT_FAILED:
-                    Log.d("myTag", "recieved CONNECTION_FAILED");
                     // model.connect(null);
                     break;
                 // send a request to the host if the connection has been established
                 case BluetoothService.CONNECTION_ESTABLISHED:{
-                    Log.d("myTag", "recieved CONNECTION_EXTABLISHED");
                     GameMessage gameMessage = new GameMessage(GameMessage.Type.REQUEST);
                     model.bluetoothService.write(gameMessage);
                 }
                 case BluetoothService.FROM_OTHER_DEVICES:
                     if (msg.obj instanceof GameMessage){
-                        Log.d("myTag", "recieved game message");
                         GameMessage gameMessage = (GameMessage) msg.obj;
                         GameMessage.Type type = gameMessage.getType();
                         switch (type){
@@ -81,7 +78,6 @@ public class ClientGameModel extends MultiPlayerGameModel {
                         }
                     }
                     else if (msg.obj instanceof Setting){
-                        Log.d("myTag", "recieved setting");
                         model.init((Setting) msg.obj);
                         // notify the LobbyActivity to start GameActivity
                         if (model.numPlayers != null && model.myPlayerId != null){
@@ -96,17 +92,14 @@ public class ClientGameModel extends MultiPlayerGameModel {
                         }
                     }
                     else if (msg.obj instanceof Piece){
-                        Log.d("myTag", "recieved piece");
                         Piece piece = (Piece) msg.obj;
                         model.placePiece(piece);
                     } else if (msg.obj instanceof AudioClip){
-                        Log.d("myTag", "recieved!");
                         AudioClip audioClip = (AudioClip) msg.obj;
                         model.playAudio(audioClip);
                     }
                     break;
                 default:
-                    Log.d("myTag", "recieved WE SHOULDNT GET HERE");
                     // we should not run into this block
             }
         }
@@ -138,7 +131,6 @@ public class ClientGameModel extends MultiPlayerGameModel {
 
     @Override
     public Boolean sendAudio (AudioClip audioClip) {
-        Log.d("myTag", "ClientGameModel sending byte array");
         bluetoothService.write(audioClip);
         return true;
     }

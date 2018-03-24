@@ -19,14 +19,12 @@ import java.io.OutputStream;
 import java.util.UUID;
 
 /**
- * This class does all the work for setting up and managing Bluetooth
- * connections with other devices. It has a thread that listens for
- * incoming connections, a thread for connecting with a device, and a
- * thread for performing data transmissions when connected.
+ * Assistance + some boilerplate code from https://developer.android.com/samples/BluetoothChat/index.html
+ * This helped with establishing a bluetooth socket between phones.
  */
 public class BluetoothService {
     // Debugging
-    private static final String TAG = "BluetoothChatService";
+    private static final String TAG = "myTag";
 
     // Name for the SDP record when creating server socket
     private static final String NAME_SECURE = "BluetoothChatSecure";
@@ -528,7 +526,6 @@ public class BluetoothService {
         public void write(Object o) {
             try {
                 mmOutStream.writeObject(o);
-                Log.d("myTag", " send object " + o.getClass().toString());
                 // Share the sent message back to the UI Activity
 //                mHandler.obtainMessage(FROM_MYSELF, o).sendToTarget();
             } catch (IOException e) {

@@ -180,23 +180,12 @@ public class ServerGameModel extends MultiPlayerGameModel {
 
     @Override
     public Boolean sendAudio (AudioClip audioClip) {
-        Log.d("myTag", "ClientGameModel sending byte array");
-        //bluetoothService.write(audioClip);
         broadcast(audioClip);
         return true;
     }
 
     public Boolean playAudio(AudioClip audioClip) {
-            // If the audio clip was sent by myself
-
-           // if (audioClip.getId().equals(myPlayerId)) {
-                broadcast(audioClip);
-          //  }
-
-
-        //}
-        //return false;
-
+        broadcast(audioClip);
 
         byte[] audioFile = audioClip.getAudioClip();
         try {

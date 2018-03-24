@@ -186,12 +186,15 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         recordButtonLayout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
         recordButtonLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
 
+        // Red microphone button on bottom right
         sendAudioButton = new ImageView(getApplicationContext());
         sendAudioButton.setImageResource(R.drawable.microphone);
         sendAudioButton.setLayoutParams(recordButtonLayout);
         if (model instanceof ServerGameModel || model instanceof ClientGameModel) {
             rootLayout.addView(sendAudioButton);
         }
+
+        // Press and hold to record, release to send
         sendAudioButton.setOnTouchListener(new ImageView.OnTouchListener(){
             @Override
             public boolean onTouch(View view, MotionEvent event) {
@@ -436,14 +439,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     }
 
-    private void onRecord(boolean start) {
-        if (start) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
-    }
-
+    // start recording an audio clip
     private void startRecording() {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -456,10 +452,10 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         } catch (IOException e) {
             Log.e("myTag", "prepare() failed");
         }
-
         mediaRecorder.start();
     }
 
+    // user released mic button, stop recording and send audio clip
     private void stopRecording() {
         mediaRecorder.stop();
         mediaRecorder.release();
@@ -469,7 +465,6 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
             fileInputStream.read(b);
-            Log.d("myTag","sending mPlayer");
             AudioClip audioClipForSending = new AudioClip(model.getMyPlayerId(),b);
             model.sendAudio(audioClipForSending);
         } catch (FileNotFoundException e) {
