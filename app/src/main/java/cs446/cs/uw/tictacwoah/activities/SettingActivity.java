@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -54,7 +55,7 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         numberOfAISpinner.setOnItemSelectedListener(this);
         inflateSpinners();
 
-        Button playButton = findViewById(R.id.play_button);
+        ImageView playButton = findViewById(R.id.play_button);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

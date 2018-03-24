@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import cs446.cs.uw.tictacwoah.R;
+import cs446.cs.uw.tictacwoah.activityModels.ClientGameModel;
 import cs446.cs.uw.tictacwoah.activityModels.GameModel;
 import cs446.cs.uw.tictacwoah.activityModels.ServerGameModel;
 import cs446.cs.uw.tictacwoah.models.AudioClip;
@@ -60,7 +62,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     private RelativeLayout rootLayout;
     private BoardView boardView;
-    private Button restartButton;
+    private ImageView restartButton;
 
     private PieceView[][][] boardPieces;
     private List<TurnIndicator> turnIndicators;
@@ -132,8 +134,8 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         boardView.setLayoutParams(layoutParams);
         rootLayout.addView(boardView);
 
-        restartButton = new Button(this);
-        restartButton.setText(initialButtonText);
+        restartButton = new ImageView(this);
+        restartButton.setImageResource(R.drawable.play);
         restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
 
         layoutParams = new RelativeLayout.LayoutParams(
@@ -183,7 +185,9 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         sendAudioButton = new RecordButton(this);
         sendAudioButton.setY(0);
         sendAudioButton.setLayoutParams(layoutParams);
-        rootLayout.addView(sendAudioButton);
+        if (model instanceof ServerGameModel || model instanceof ClientGameModel) {
+            rootLayout.addView(sendAudioButton);
+        }
     }
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -344,7 +348,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
             countDownTimer.cancel();
             showWinningPattern(model.getWinningPattern());
             showWinOrLoseMessage(model.getWinningPattern()[0].getId());
-            restartButton.setText(reStartButtonText);
+            restartButton.setImageResource(R.drawable.restart);
             if (model.hasRightToStartGame()) restartButton.setVisibility(View.VISIBLE);
             gameOver = true;
         }
