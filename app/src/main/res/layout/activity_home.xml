@@ -4,25 +4,33 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="cs446.cs.uw.tictacwoah.activities.HomeActivity">
+    tools:context="cs446.cs.uw.tictacwoah.activities.HomeActivity"
+    android:background="@drawable/home_background">
 
 
-    <Button
+
+    <ImageView
         android:id="@+id/single_player_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
+        android:layout_width="300dp"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="179dp"
-        android:text="Single Player" />
+        android:layout_marginTop="250dp"
+        android:contentDescription="singleplayer"
+        app:srcCompat="@drawable/single_player"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        />
 
-    <Button
+    <ImageView
         android:id="@+id/multi_player_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
+        android:layout_width="300dp"
         android:layout_alignStart="@+id/single_player_button"
         android:layout_below="@+id/single_player_button"
-        android:layout_marginTop="130dp"
+        android:layout_marginTop="50dp"
+        android:contentDescription="multiplayer"
+        app:srcCompat="@drawable/multiplayer"
         android:text="Multiplayer" />
 
     <ImageButton
@@ -37,5 +45,15 @@
         android:contentDescription="help"
         android:onClick="onHelpBtn"
         app:srcCompat="@android:drawable/ic_menu_help" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="67dp"
+        app:srcCompat="@drawable/tic_tac_whoa_logo" />
 
 </RelativeLayout>
