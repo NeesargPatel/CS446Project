@@ -45,13 +45,13 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="@dimen/padding_between_spinner_group" >
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/text_view_AI_level"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingTop="@dimen/padding_between_spinner_group"
             android:paddingBottom="@dimen/padding_between_spinner_and_text"
             style="@style/spinner_message"
             android:text="@string/AI_level_spinner_text" />
@@ -65,18 +65,38 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingTop="@dimen/padding_between_spinner_group" >
+        android:orientation="vertical">
 
         <TextView
             android:id="@+id/text_view_number_of_AI"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:paddingTop="@dimen/padding_between_spinner_group"
             android:paddingBottom="@dimen/padding_between_spinner_and_text"
             style="@style/spinner_message"
             android:text="@string/number_of_AI_spinner_text" />
         <Spinner
             android:id="@+id/spinner_number_of_AI"
+            android:layout_width="match_parent"
+            style="@style/spinner"
+            android:spinnerMode="dialog" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/text_view_number_of_players"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingTop="@dimen/padding_between_spinner_group"
+            android:paddingBottom="@dimen/padding_between_spinner_and_text"
+            style="@style/spinner_message"
+            android:text="@string/number_of_players_text" />
+        <Spinner
+            android:id="@+id/spinner_number_of_players"
             android:layout_width="match_parent"
             style="@style/spinner"
             android:spinnerMode="dialog" />

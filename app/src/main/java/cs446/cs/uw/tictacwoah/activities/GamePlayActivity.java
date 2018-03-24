@@ -33,6 +33,7 @@ import java.util.Observer;
 
 import cs446.cs.uw.tictacwoah.R;
 import cs446.cs.uw.tictacwoah.activityModels.GameModel;
+import cs446.cs.uw.tictacwoah.activityModels.HotseatGameModel;
 import cs446.cs.uw.tictacwoah.activityModels.ServerGameModel;
 import cs446.cs.uw.tictacwoah.models.AudioClip;
 import cs446.cs.uw.tictacwoah.models.Board;
@@ -371,6 +372,8 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         // Since Integer is mutable, so we can directly use assignment operator here
         // (assign the underlying value of model.getCurPlayer() to curPlayer)
         curPlayer = model.getCurPlayer();
+        if (model instanceof HotseatGameModel)
+            createDraggablePieces();
         turnIndicators.get(curPlayer).startAnimation();
     }
 
@@ -397,7 +400,11 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     }
 
     public void showWinOrLoseMessage(Integer winnerId){
-        String msg = (winnerId.equals(model.getMyPlayerId())) ? "You win. " : "You lose. ";
+        String msg = "";
+        if (model instanceof HotseatGameModel)
+            msg = "Player " + Integer.toString(winnerId + 1) + " wins! ";
+        else
+            msg = (winnerId.equals(model.getMyPlayerId())) ? "You win. " : "You lose. ";
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
     // function to get permissions for audio recording

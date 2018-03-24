@@ -39,6 +39,7 @@ public abstract class GameModel extends Observable {
     public static final String GAME_MODE_KEY = "gameMode";
     public enum GameMode {
         SINGLE,
+        HOTSEAT,
         MULTI_PLAYER
     }
 
@@ -46,6 +47,7 @@ public abstract class GameModel extends Observable {
     public static final int TIME_LIMIT_INTERVAL = 5;
     public static final int MAX_PLAYERS = 4;
     public static final int MAX_AI_PLAYERS = 3;
+    public static final int MAX_HS_PLAYERS = 3;
 
     public static GameModel getInstance(GameMode mode, @Nullable Boolean isHost){
         if (mode.equals(GameMode.SINGLE)) return SingleGameModel.getInstance();
@@ -53,6 +55,8 @@ public abstract class GameModel extends Observable {
             if (isHost) return ServerGameModel.getInstance();
             else return ClientGameModel.getInstance();
         }
+        else if (mode.equals(GameMode.HOTSEAT))
+            return HotseatGameModel.getInstance();
         return null;
     }
 
@@ -97,6 +101,8 @@ public abstract class GameModel extends Observable {
         gaming = true;
         curPlayer = 0;
         board.reset();
+        if (this instanceof HotseatGameModel)
+            myPlayerId = 0;
         setChangedAndNotify();
     }
 
@@ -144,6 +150,8 @@ public abstract class GameModel extends Observable {
 
     private void nextPlayer(){
         curPlayer = (curPlayer + 1) % numPlayers;
+        if (this instanceof HotseatGameModel)
+            myPlayerId = curPlayer;
         setChangedAndNotify();
     }
 

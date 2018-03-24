@@ -6,7 +6,8 @@
     <string name="shape_spinner_text">Shape</string>
     <string name="time_limit_spinner_text">Time Limit</string>
     <string name="AI_level_spinner_text">AI Level</string>
-    <string name="number_of_AI_spinner_text"># AI</string>
+    <string name="number_of_AI_spinner_text">AI</string>
+    <string name="number_of_players_text">Players</string>
     <string name="play_button_text">Play!</string>
     <string name="action_previous">Previous</string>
     <string name="action_next">Next</string>
@@ -30,5 +31,7 @@
     ]]></string>
     <string name="help_title">GAMEPLAY HELP</string>
 
-    <item type="id" name="action_next" />
+    <string name="singleplayer_text">Single Player</string>
+    <string name="multiplayer_text">Multiplayer</string>
+    <string name="hotseat_text">Hotseat</string>
 </resources>

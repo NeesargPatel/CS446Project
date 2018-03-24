@@ -55,6 +55,12 @@ public class HomeActivity extends AppCompatActivity {
         startActivity(bluetooth);
     }
 
+    public void onHotseatBtn(View view) {
+        Intent hotseat  = new Intent(this, SettingActivity.class);
+        hotseat.putExtra(GameModel.GAME_MODE_KEY, GameModel.GameMode.HOTSEAT);
+        startActivity(hotseat);
+    }
+
     public void onHelpBtn(View view) {
         startActivity(new Intent(this, HelpActivity.class));
     }

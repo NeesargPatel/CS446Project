@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +35,7 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
 
     private Setting setting;
 
-    private Spinner shapeSpinner, timeLimitSpinner, AILevelSpinner, numberOfAISpinner;
+    private Spinner shapeSpinner, timeLimitSpinner, AILevelSpinner, numberOfAISpinner, numberOfHsPlayersSpinner;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,15 +45,18 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
 
         TextView AILevelTextView = findViewById(R.id.text_view_AI_level);
         TextView numberOfAITextView = findViewById(R.id.text_view_number_of_AI);
+        TextView numberOfHsPlayersView = findViewById(R.id.text_view_number_of_players);
 
         shapeSpinner = findViewById(R.id.spinner_shape);
         timeLimitSpinner = findViewById(R.id.spinner_time_limit);
         AILevelSpinner = findViewById(R.id.spinner_AI_level);
         numberOfAISpinner = findViewById(R.id.spinner_number_of_AI);
+        numberOfHsPlayersSpinner = findViewById(R.id.spinner_number_of_players);
         shapeSpinner.setOnItemSelectedListener(this);
         timeLimitSpinner.setOnItemSelectedListener(this);
         AILevelSpinner.setOnItemSelectedListener(this);
         numberOfAISpinner.setOnItemSelectedListener(this);
+        numberOfHsPlayersSpinner.setOnItemSelectedListener(this);
         inflateSpinners();
 
         Button playButton = findViewById(R.id.play_button);
@@ -65,6 +70,14 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
         GameModel.GameMode gameMode = (GameModel.GameMode)
                 getIntent().getExtras().getSerializable(GameModel.GAME_MODE_KEY);
         if (gameMode.equals(GameModel.GameMode.MULTI_PLAYER)){
+            AILevelTextView.setVisibility(View.GONE);
+            numberOfAITextView.setVisibility(View.GONE);
+            AILevelSpinner.setVisibility(View.GONE);
+            numberOfAISpinner.setVisibility(View.GONE);
+            numberOfHsPlayersView.setVisibility(View.GONE);
+            numberOfHsPlayersSpinner.setVisibility(View.GONE);
+        }
+        else if(gameMode.equals(GameModel.GameMode.HOTSEAT)) {
             AILevelTextView.setVisibility(View.GONE);
             numberOfAITextView.setVisibility(View.GONE);
             AILevelSpinner.setVisibility(View.GONE);
@@ -87,6 +100,9 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
                 break;
             case R.id.spinner_number_of_AI:
                 setting.setNumAIs(key, Integer.parseInt(selectedString));
+                break;
+            case R.id.spinner_number_of_players:
+                setting.setNumHsPlayers(key, Integer.parseInt(selectedString));
                 break;
             default:
                 // should not in here
@@ -124,6 +140,12 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
             spinnerArray.add(Integer.toString(i));
         }
         setSpinnerArrayAndSelectDefaultOption(numberOfAISpinner, spinnerArray, Integer.toString(Setting.defaultNumAIs));
+
+        spinnerArray = new ArrayList<>();
+        for (int i = 1; i <= GameModel.MAX_HS_PLAYERS; ++i){
+            spinnerArray.add(Integer.toString(i));
+        }
+        setSpinnerArrayAndSelectDefaultOption(numberOfHsPlayersSpinner, spinnerArray, Integer.toString(Setting.defaultNumHsPlayers));
     }
 
     private void setSpinnerArrayAndSelectDefaultOption(Spinner spinner, List<String> items, String option){

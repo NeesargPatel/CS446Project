@@ -18,11 +18,13 @@ public class Setting implements Serializable {
     public static final int defaultTimeLimit = 15;
     public static final AI.LEVEL defaultAILevel = AI.LEVEL.EASY;
     public static final int defaultNumAIs = 1;
+    public static final int defaultNumHsPlayers = 1;        // default # of hotseat players
 
     private PieceView.SHAPE shape;
     private int timeLimit;
     private AI.LEVEL level;
     private int numAIs;
+    private int numHsPlayers;     // number of players in hotseat mode
 
     // default settings
     public Setting(){
@@ -30,6 +32,7 @@ public class Setting implements Serializable {
         timeLimit = defaultTimeLimit;
         level = defaultAILevel;
         numAIs = defaultNumAIs;
+        numHsPlayers = defaultNumHsPlayers;
     }
 
     public PieceView.SHAPE getShape() {
@@ -48,6 +51,10 @@ public class Setting implements Serializable {
         return numAIs;
     }
 
+    public int getNumHsPlayers() {
+        return numHsPlayers;
+    }
+
     public void setShape(SettingActivity.KeyToChangeSetting key, PieceView.SHAPE shape) {
         if (key != null)    this.shape = shape;
     }
@@ -62,5 +69,9 @@ public class Setting implements Serializable {
 
     public void setNumAIs(SettingActivity.KeyToChangeSetting key, int numAIs) {
         if (key != null)    this.numAIs = numAIs;
+    }
+
+    public void setNumHsPlayers(SettingActivity.KeyToChangeSetting key, int numHsPlayers) {
+        if (key != null)    this.numHsPlayers = numHsPlayers;
     }
 }

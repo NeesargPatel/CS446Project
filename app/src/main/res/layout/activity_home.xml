@@ -11,19 +11,28 @@
         android:id="@+id/single_player_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_alignBottom="@+id/hotseat_button"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="179dp"
-        android:text="Single Player" />
+        android:layout_marginBottom="77dp"
+        android:text="@string/singleplayer_text" />
+
+    <Button
+        android:id="@+id/hotseat_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:onClick="onHotseatBtn"
+        android:text="@string/hotseat_text" />
 
     <Button
         android:id="@+id/multi_player_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/single_player_button"
-        android:layout_below="@+id/single_player_button"
-        android:layout_marginTop="130dp"
-        android:text="Multiplayer" />
+        android:layout_centerHorizontal="true"
+        android:layout_alignTop="@+id/hotseat_button"
+        android:layout_marginTop="77dp"
+        android:text="@string/multiplayer_text" />
 
     <ImageButton
         android:id="@+id/help_button"
