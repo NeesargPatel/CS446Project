@@ -4,24 +4,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="cs446.cs.uw.tictacwoah.activities.BluetoothActivity">
+    tools:context="cs446.cs.uw.tictacwoah.activities.BluetoothActivity"
+    android:background="@drawable/home_background">
 
-    <Button
+    <ImageView
         android:id="@+id/create_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_height="40dp"
+
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="179dp"
-        android:text="Create" />
-
-    <Button
-        android:id="@+id/join_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/single_player_button"
-        android:layout_below="@+id/single_player_button"
         android:layout_marginTop="130dp"
-        android:text="Join" />
+        app:srcCompat="@drawable/create_game" />
+    <ImageView
+        android:id="@+id/join_button"
+        android:layout_height="40dp"
+        android:layout_width="300dp"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="250dp"
+        android:contentDescription="join"
+        app:srcCompat="@drawable/join_game"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        />
 
 </RelativeLayout>
