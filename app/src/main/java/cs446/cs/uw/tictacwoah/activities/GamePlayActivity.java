@@ -51,9 +51,6 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     private final int MILLIS_PER_SECOND = 1000;
     private final int TEXT_SIZE = 40, TEXT_MARGIN_TOP = 50, TEXT_MARGIN_RIGHT = 200;
 
-    private final CharSequence initialButtonText = "Start";
-    private final CharSequence reStartButtonText = "Restart";
-
     private GameModel model;
     private Piece lastPlacedPiece;
     private Integer curPlayer;
@@ -182,18 +179,40 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
         // Request permissions for audio recording
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-        sendAudioButton = new RecordButton(this);
-        sendAudioButton.setY(0);
-        sendAudioButton.setLayoutParams(layoutParams);
+        RelativeLayout.LayoutParams recordButtonLayout = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+        recordButtonLayout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        recordButtonLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+
+        sendAudioButton = new ImageView(getApplicationContext());
+        sendAudioButton.setImageResource(R.drawable.microphone);
+        sendAudioButton.setLayoutParams(recordButtonLayout);
         if (model instanceof ServerGameModel || model instanceof ClientGameModel) {
             rootLayout.addView(sendAudioButton);
         }
+        sendAudioButton.setOnTouchListener(new ImageView.OnTouchListener(){
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                int curAction = event.getActionMasked();
+                switch (curAction) {
+                    case MotionEvent.ACTION_DOWN:
+                        startRecording();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        stopRecording();
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String defaultFileName = null;
 
-    private RecordButton sendAudioButton = null;
+    private ImageView sendAudioButton = null;
     private MediaRecorder mediaRecorder = null;
 
     // Requesting permission to RECORD_AUDIO
@@ -462,28 +481,6 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
             System.out.println("Error Reading The File.");
             Log.d("myTag","Error Reading The File.");
             e1.printStackTrace();
-        }
-    }
-
-    class RecordButton extends android.support.v7.widget.AppCompatButton {
-        boolean mStartRecording = true;
-
-        OnClickListener clicker = new OnClickListener() {
-            public void onClick(View v) {
-                onRecord(mStartRecording);
-                if (mStartRecording) {
-                    setText("Stop recording");
-                } else {
-                    setText("Start recording");
-                }
-                mStartRecording = !mStartRecording;
-            }
-        };
-
-        public RecordButton(Context ctx) {
-            super(ctx);
-            setText("Start recording");
-            setOnClickListener(clicker);
         }
     }
 }
