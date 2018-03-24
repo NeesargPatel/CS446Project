@@ -255,6 +255,9 @@ public class BluetoothService {
             r = mConnectedThread;
         }
         // Perform the write unsynchronized
+        if (o instanceof AudioClip) {
+            Log.d("myTag", "sent type audioclip");
+        }
         r.write(o);
     }
 
@@ -529,7 +532,8 @@ public class BluetoothService {
                 // Share the sent message back to the UI Activity
 //                mHandler.obtainMessage(FROM_MYSELF, o).sendToTarget();
             } catch (IOException e) {
-                Log.e(TAG, " Exception during write", e);
+                Log.d("myTag", "there was an error during ConnectedThread.write(o)");
+                Log.e("myTag", " Exception during write", e);
             }
         }
 

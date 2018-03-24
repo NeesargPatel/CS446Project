@@ -10,8 +10,10 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
+import cs446.cs.uw.tictacwoah.activities.GamePlayActivity;
 import cs446.cs.uw.tictacwoah.models.AudioClip;
 import cs446.cs.uw.tictacwoah.models.BluetoothService;
 import cs446.cs.uw.tictacwoah.models.Piece;
@@ -46,15 +48,18 @@ public class ClientGameModel extends MultiPlayerGameModel {
             switch (msg.what) {
                 // keep trying connecting to the host
                 case BluetoothService.CONNECT_FAILED:
+                    Log.d("myTag", "recieved CONNECTION_FAILED");
                     // model.connect(null);
                     break;
                 // send a request to the host if the connection has been established
                 case BluetoothService.CONNECTION_ESTABLISHED:{
+                    Log.d("myTag", "recieved CONNECTION_EXTABLISHED");
                     GameMessage gameMessage = new GameMessage(GameMessage.Type.REQUEST);
                     model.bluetoothService.write(gameMessage);
                 }
                 case BluetoothService.FROM_OTHER_DEVICES:
                     if (msg.obj instanceof GameMessage){
+                        Log.d("myTag", "recieved game message");
                         GameMessage gameMessage = (GameMessage) msg.obj;
                         GameMessage.Type type = gameMessage.getType();
                         switch (type){
@@ -76,6 +81,7 @@ public class ClientGameModel extends MultiPlayerGameModel {
                         }
                     }
                     else if (msg.obj instanceof Setting){
+                        Log.d("myTag", "recieved setting");
                         model.init((Setting) msg.obj);
                         // notify the LobbyActivity to start GameActivity
                         if (model.numPlayers != null && model.myPlayerId != null){
@@ -90,16 +96,17 @@ public class ClientGameModel extends MultiPlayerGameModel {
                         }
                     }
                     else if (msg.obj instanceof Piece){
+                        Log.d("myTag", "recieved piece");
                         Piece piece = (Piece) msg.obj;
                         model.placePiece(piece);
                     } else if (msg.obj instanceof AudioClip){
                         Log.d("myTag", "recieved!");
                         AudioClip audioClip = (AudioClip) msg.obj;
-                        // Just play the audio clip
                         model.playAudio(audioClip);
                     }
                     break;
                 default:
+                    Log.d("myTag", "recieved WE SHOULDNT GET HERE");
                     // we should not run into this block
             }
         }
@@ -138,9 +145,25 @@ public class ClientGameModel extends MultiPlayerGameModel {
 
     @Override
     public Boolean playAudio (AudioClip audioClip) {
-        // TODO: play the audio clip
-        audioClip.getAudioClip();
-        return true;
+        if (audioClip.getId() != model.myPlayerId) {
+            byte[] audioFile = audioClip.getAudioClip();
+            try {
+                String mFileName = GamePlayActivity.cacheDir.getAbsolutePath();
+                mFileName += "/audiorecordtest.3gp";
+                FileOutputStream out = new FileOutputStream(mFileName);
+                out.write(audioFile);
+                out.close();
+                MediaPlayer mediaPlayer = new MediaPlayer();
+                mediaPlayer.setDataSource(mFileName);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+
+            } catch (IOException e) {
+
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

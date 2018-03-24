@@ -183,7 +183,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         sendAudioButton = new RecordButton(this);
         sendAudioButton.setY(0);
         sendAudioButton.setLayoutParams(layoutParams);
-        //rootLayout.addView(sendAudioButton);
+        rootLayout.addView(sendAudioButton);
     }
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
@@ -451,10 +451,12 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
             model.sendAudio(audioClipForSending);
         } catch (FileNotFoundException e) {
             System.out.println("File Not Found.");
+            Log.d("myTag","File Not Found.");
             e.printStackTrace();
         }
         catch (IOException e1) {
             System.out.println("Error Reading The File.");
+            Log.d("myTag","Error Reading The File.");
             e1.printStackTrace();
         }
     }
