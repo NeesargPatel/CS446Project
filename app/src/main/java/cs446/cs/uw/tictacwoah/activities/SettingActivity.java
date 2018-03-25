@@ -70,7 +70,11 @@ public class SettingActivity extends AppCompatActivity implements AdapterView.On
 
         GameModel.GameMode gameMode = (GameModel.GameMode)
                 getIntent().getExtras().getSerializable(GameModel.GAME_MODE_KEY);
-        if (gameMode.equals(GameModel.GameMode.MULTI_PLAYER)){
+        if (gameMode.equals(GameModel.GameMode.SINGLE)) {
+            numberOfHsPlayersView.setVisibility(View.GONE);
+            numberOfHsPlayersSpinner.setVisibility(View.GONE);
+        }
+        else if (gameMode.equals(GameModel.GameMode.MULTI_PLAYER)){
             AILevelTextView.setVisibility(View.GONE);
             numberOfAITextView.setVisibility(View.GONE);
             AILevelSpinner.setVisibility(View.GONE);

@@ -100,6 +100,7 @@
             android:paddingTop="@dimen/padding_between_spinner_group"
             android:paddingBottom="@dimen/padding_between_spinner_and_text"
             style="@style/spinner_message"
+            android:fontFamily="@font/gochihand_regular"
             android:text="@string/number_of_players_text" />
         <Spinner
             android:id="@+id/spinner_number_of_players"
