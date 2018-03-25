@@ -4,17 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="cs446.cs.uw.tictacwoah.activities.HomeActivity">
+    tools:context="cs446.cs.uw.tictacwoah.activities.HomeActivity"
+    android:background="@drawable/home_background">
 
 
-    <Button
+
+    <ImageView
         android:id="@+id/single_player_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/hotseat_button"
+        android:layout_height="40dp"
+        android:layout_width="300dp"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="77dp"
-        android:text="@string/singleplayer_text" />
+        android:layout_marginTop="250dp"
+        android:contentDescription="singleplayer"
+        app:srcCompat="@drawable/single_player"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true" />
 
     <Button
         android:id="@+id/hotseat_button"
@@ -25,14 +30,16 @@
         android:onClick="onHotseatBtn"
         android:text="@string/hotseat_text" />
 
-    <Button
+    <ImageView
         android:id="@+id/multi_player_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_alignTop="@+id/hotseat_button"
-        android:layout_marginTop="77dp"
-        android:text="@string/multiplayer_text" />
+        android:layout_height="40dp"
+        android:layout_width="300dp"
+        android:layout_alignStart="@+id/single_player_button"
+        android:layout_below="@+id/single_player_button"
+        android:layout_marginTop="50dp"
+        android:contentDescription="multiplayer"
+        app:srcCompat="@drawable/multiplayer"
+        android:text="Multiplayer" />
 
     <ImageButton
         android:id="@+id/help_button"
@@ -46,5 +53,15 @@
         android:contentDescription="help"
         android:onClick="onHelpBtn"
         app:srcCompat="@android:drawable/ic_menu_help" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="67dp"
+        app:srcCompat="@drawable/tic_tac_whoa_logo" />
 
 </RelativeLayout>

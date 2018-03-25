@@ -10,8 +10,10 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
+import cs446.cs.uw.tictacwoah.activities.GamePlayActivity;
 import cs446.cs.uw.tictacwoah.models.AudioClip;
 import cs446.cs.uw.tictacwoah.models.BluetoothService;
 import cs446.cs.uw.tictacwoah.models.Piece;
@@ -93,9 +95,7 @@ public class ClientGameModel extends MultiPlayerGameModel {
                         Piece piece = (Piece) msg.obj;
                         model.placePiece(piece);
                     } else if (msg.obj instanceof AudioClip){
-                        Log.d("myTag", "recieved!");
                         AudioClip audioClip = (AudioClip) msg.obj;
-                        // Just play the audio clip
                         model.playAudio(audioClip);
                     }
                     break;
@@ -131,16 +131,31 @@ public class ClientGameModel extends MultiPlayerGameModel {
 
     @Override
     public Boolean sendAudio (AudioClip audioClip) {
-        Log.d("myTag", "ClientGameModel sending byte array");
         bluetoothService.write(audioClip);
         return true;
     }
 
     @Override
     public Boolean playAudio (AudioClip audioClip) {
-        // TODO: play the audio clip
-        audioClip.getAudioClip();
-        return true;
+        if (audioClip.getId() != model.myPlayerId) {
+            byte[] audioFile = audioClip.getAudioClip();
+            try {
+                String mFileName = GamePlayActivity.cacheDir.getAbsolutePath();
+                mFileName += "/audiorecordtest.3gp";
+                FileOutputStream out = new FileOutputStream(mFileName);
+                out.write(audioFile);
+                out.close();
+                MediaPlayer mediaPlayer = new MediaPlayer();
+                mediaPlayer.setDataSource(mFileName);
+                mediaPlayer.prepare();
+                mediaPlayer.start();
+
+            } catch (IOException e) {
+
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

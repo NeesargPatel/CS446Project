@@ -17,6 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,6 +33,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import cs446.cs.uw.tictacwoah.R;
+import cs446.cs.uw.tictacwoah.activityModels.ClientGameModel;
 import cs446.cs.uw.tictacwoah.activityModels.GameModel;
 import cs446.cs.uw.tictacwoah.activityModels.HotseatGameModel;
 import cs446.cs.uw.tictacwoah.activityModels.ServerGameModel;
@@ -50,9 +52,6 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
     private final int MILLIS_PER_SECOND = 1000;
     private final int TEXT_SIZE = 40, TEXT_MARGIN_TOP = 50, TEXT_MARGIN_RIGHT = 200;
 
-    private final CharSequence initialButtonText = "Start";
-    private final CharSequence reStartButtonText = "Restart";
-
     private GameModel model;
     private Piece lastPlacedPiece;
     private Integer curPlayer;
@@ -61,7 +60,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     private RelativeLayout rootLayout;
     private BoardView boardView;
-    private Button restartButton;
+    private ImageView restartButton;
 
     private PieceView[][][] boardPieces;
     private List<TurnIndicator> turnIndicators;
@@ -133,8 +132,8 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         boardView.setLayoutParams(layoutParams);
         rootLayout.addView(boardView);
 
-        restartButton = new Button(this);
-        restartButton.setText(initialButtonText);
+        restartButton = new ImageView(this);
+        restartButton.setImageResource(R.drawable.play);
         restartButton.setY(boardView.MARGIN_TOP + boardView.getCellWidth() * (Board.SIZE + 1));
 
         layoutParams = new RelativeLayout.LayoutParams(
@@ -181,16 +180,43 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
         // Request permissions for audio recording
         ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
-        sendAudioButton = new RecordButton(this);
-        sendAudioButton.setY(0);
-        sendAudioButton.setLayoutParams(layoutParams);
-        //rootLayout.addView(sendAudioButton);
+        RelativeLayout.LayoutParams recordButtonLayout = new RelativeLayout.LayoutParams(
+                RelativeLayout.LayoutParams.WRAP_CONTENT,
+                RelativeLayout.LayoutParams.WRAP_CONTENT
+        );
+        recordButtonLayout.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);
+        recordButtonLayout.addRule(RelativeLayout.ALIGN_PARENT_RIGHT, RelativeLayout.TRUE);
+
+        // Red microphone button on bottom right
+        sendAudioButton = new ImageView(getApplicationContext());
+        sendAudioButton.setImageResource(R.drawable.microphone);
+        sendAudioButton.setLayoutParams(recordButtonLayout);
+        if (model instanceof ServerGameModel || model instanceof ClientGameModel) {
+            rootLayout.addView(sendAudioButton);
+        }
+
+        // Press and hold to record, release to send
+        sendAudioButton.setOnTouchListener(new ImageView.OnTouchListener(){
+            @Override
+            public boolean onTouch(View view, MotionEvent event) {
+                int curAction = event.getActionMasked();
+                switch (curAction) {
+                    case MotionEvent.ACTION_DOWN:
+                        startRecording();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        stopRecording();
+                        break;
+                }
+                return true;
+            }
+        });
     }
 
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
     private static String defaultFileName = null;
 
-    private RecordButton sendAudioButton = null;
+    private ImageView sendAudioButton = null;
     private MediaRecorder mediaRecorder = null;
 
     // Requesting permission to RECORD_AUDIO
@@ -345,7 +371,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
             countDownTimer.cancel();
             showWinningPattern(model.getWinningPattern());
             showWinOrLoseMessage(model.getWinningPattern()[0].getId());
-            restartButton.setText(reStartButtonText);
+            restartButton.setImageResource(R.drawable.restart);
             if (model.hasRightToStartGame()) restartButton.setVisibility(View.VISIBLE);
             gameOver = true;
         }
@@ -420,14 +446,7 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
 
     }
 
-    private void onRecord(boolean start) {
-        if (start) {
-            startRecording();
-        } else {
-            stopRecording();
-        }
-    }
-
+    // start recording an audio clip
     private void startRecording() {
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -440,10 +459,10 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         } catch (IOException e) {
             Log.e("myTag", "prepare() failed");
         }
-
         mediaRecorder.start();
     }
 
+    // user released mic button, stop recording and send audio clip
     private void stopRecording() {
         mediaRecorder.stop();
         mediaRecorder.release();
@@ -453,38 +472,17 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         try {
             FileInputStream fileInputStream = new FileInputStream(file);
             fileInputStream.read(b);
-            Log.d("myTag","sending mPlayer");
             AudioClip audioClipForSending = new AudioClip(model.getMyPlayerId(),b);
             model.sendAudio(audioClipForSending);
         } catch (FileNotFoundException e) {
             System.out.println("File Not Found.");
+            Log.d("myTag","File Not Found.");
             e.printStackTrace();
         }
         catch (IOException e1) {
             System.out.println("Error Reading The File.");
+            Log.d("myTag","Error Reading The File.");
             e1.printStackTrace();
-        }
-    }
-
-    class RecordButton extends android.support.v7.widget.AppCompatButton {
-        boolean mStartRecording = true;
-
-        OnClickListener clicker = new OnClickListener() {
-            public void onClick(View v) {
-                onRecord(mStartRecording);
-                if (mStartRecording) {
-                    setText("Stop recording");
-                } else {
-                    setText("Start recording");
-                }
-                mStartRecording = !mStartRecording;
-            }
-        };
-
-        public RecordButton(Context ctx) {
-            super(ctx);
-            setText("Start recording");
-            setOnClickListener(clicker);
         }
     }
 }

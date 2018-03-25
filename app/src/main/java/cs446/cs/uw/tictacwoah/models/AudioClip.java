@@ -3,8 +3,8 @@ package cs446.cs.uw.tictacwoah.models;
 /**
  * Created by Neesarg on 3/18/2018.
  */
-
-public class AudioClip {
+import java.io.Serializable;
+public class AudioClip implements Serializable {
 
     /*
     Each Piece gets an id which can be easily differentiated for each player...

@@ -45,7 +45,7 @@ public class ServerGameModel extends MultiPlayerGameModel {
 
         @Override
         public void handleMessage(Message msg) {
-            Log.d("myTag", Integer.toString(msg.arg1));
+            Log.d("myTag", Integer.toString(msg.what));
             switch (msg.what) {
                 case BluetoothService.ACCEPT_FAILED:
                     Log.d("myTag","there was an error");
@@ -104,6 +104,12 @@ public class ServerGameModel extends MultiPlayerGameModel {
                         Log.d("myTag", "recieved!");
                         AudioClip audioClip = (AudioClip) msg.obj;
                         model.playAudio(audioClip);
+                        /*
+                        //if (msg.obj instanceof AudioClip) {
+                        Log.d("myTag", "GREAT");
+                        MediaPlayer mPlayer = (MediaPlayer) msg.obj;
+                        mPlayer.start();
+                        //}
                         //broadcast to all the clients except for the one who sent the audio
                         for (int i = 0; i < model.bluetoothServices.size(); ++i) {
                             // -1 because audioClip.getId() == 0 means host
@@ -112,17 +118,13 @@ public class ServerGameModel extends MultiPlayerGameModel {
                                 model.bluetoothServices.get(i).write(audioClip);
                             }
                         }
+                        */
                     } else {
                         Log.d("myTag", "shouldnt get here");
                     }
                     break;
                 default:
                     Log.d("myTag", "defaulted");
-                    if (msg.obj instanceof MediaPlayer) {
-                        Log.d("myTag", "GREAT");
-                        MediaPlayer mPlayer = (MediaPlayer) msg.obj;
-                        mPlayer.start();
-                    }
                     // we should not run into this block
             }
         }
@@ -176,17 +178,16 @@ public class ServerGameModel extends MultiPlayerGameModel {
         return false;
     }
 
-    public Boolean playAudio(AudioClip audioClip) {
-            // If the audio clip was sent by myself
-            if (audioClip.getId().equals(myPlayerId)) {
-                broadcast(audioClip);
-            }
+    @Override
+    public Boolean sendAudio (AudioClip audioClip) {
+        broadcast(audioClip);
+        return true;
+    }
 
-            return true;
-        //}
-        //return false;
-        /**
-        byte[] audioFile = (byte[]) msg.obj;
+    public Boolean playAudio(AudioClip audioClip) {
+        broadcast(audioClip);
+
+        byte[] audioFile = audioClip.getAudioClip();
         try {
             String mFileName = GamePlayActivity.cacheDir.getAbsolutePath();
             mFileName += "/audiorecordtest.3gp";
@@ -201,7 +202,7 @@ public class ServerGameModel extends MultiPlayerGameModel {
         } catch (IOException e) {
 
         }
-         **/
+        return true;
     }
 
     public void startListening(){

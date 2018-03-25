@@ -2,7 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:background="@drawable/gameplay_background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,7 +17,8 @@
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/padding_between_spinner_and_text"
             style="@style/spinner_message"
-            android:text="@string/shape_spinner_text" />
+            android:text="@string/shape_spinner_text"
+            android:fontFamily="@font/gochihand_regular" />
         <Spinner
             android:id="@+id/spinner_shape"
             android:layout_width="match_parent"
@@ -34,7 +37,8 @@
             android:layout_height="wrap_content"
             android:paddingBottom="@dimen/padding_between_spinner_and_text"
             style="@style/spinner_message"
-            android:text="@string/time_limit_spinner_text" />
+            android:text="@string/time_limit_spinner_text"
+            android:fontFamily="@font/gochihand_regular"/>
         <Spinner
             android:id="@+id/spinner_time_limit"
             android:layout_width="match_parent"
@@ -54,7 +58,8 @@
             android:paddingTop="@dimen/padding_between_spinner_group"
             android:paddingBottom="@dimen/padding_between_spinner_and_text"
             style="@style/spinner_message"
-            android:text="@string/AI_level_spinner_text" />
+            android:text="@string/AI_level_spinner_text"
+            android:fontFamily="@font/gochihand_regular"/>
         <Spinner
             android:id="@+id/spinner_AI_level"
             android:layout_width="match_parent"
@@ -74,7 +79,8 @@
             android:paddingTop="@dimen/padding_between_spinner_group"
             android:paddingBottom="@dimen/padding_between_spinner_and_text"
             style="@style/spinner_message"
-            android:text="@string/number_of_AI_spinner_text" />
+            android:text="@string/number_of_AI_spinner_text"
+            android:fontFamily="@font/gochihand_regular"/>
         <Spinner
             android:id="@+id/spinner_number_of_AI"
             android:layout_width="match_parent"
@@ -108,12 +114,15 @@
         android:orientation="vertical"
         android:paddingTop="@dimen/padding_between_spinner_group" >
 
-        <Button
+        <ImageView
             android:id="@+id/play_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
+            android:layout_width="300dp"
+            android:layout_marginTop="50dp"
             android:layout_centerHorizontal="true"
-            android:text="@string/play_button_text"/>
+            android:contentDescription="play"
+            app:srcCompat="@drawable/play"
+            android:text="play" />
 
     </RelativeLayout>
 

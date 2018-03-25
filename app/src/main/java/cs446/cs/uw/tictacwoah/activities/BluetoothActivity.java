@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import cs446.cs.uw.tictacwoah.R;
@@ -17,7 +18,7 @@ public class BluetoothActivity extends AppCompatActivity {
     private static final int REQUEST_ENABLE_BT = 3;
 
     private BluetoothAdapter bluetoothAdapter;
-    private Button createButton, joinButton;
+    private ImageView createButton, joinButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
