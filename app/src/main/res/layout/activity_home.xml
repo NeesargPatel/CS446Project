@@ -20,15 +20,18 @@
         app:srcCompat="@drawable/single_player"
         android:scaleType="fitCenter"
         android:adjustViewBounds="true" />
-
-    <Button
+    
+    <ImageView
         android:id="@+id/hotseat_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:onClick="onHotseatBtn"
-        android:text="@string/hotseat_text" />
+        android:layout_height="30dp"
+        android:layout_width="300dp"
+        android:layout_alignStart="@+id/single_player_button"
+        android:layout_below="@+id/multi_player_button"
+        android:layout_marginTop="50dp"
+        android:contentDescription="multiplayer"
+        app:srcCompat="@drawable/hotseat"
+        android:text="Multiplayer"
+        android:onClick="onHotseatBtn"/>
 
     <ImageView
         android:id="@+id/multi_player_button"
