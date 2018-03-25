@@ -1,4 +1,5 @@
 package cs446.cs.uw.tictacwoah.models;
+import java.util.List;
 import java.util.Random;
 
 public class AI {
@@ -15,7 +16,9 @@ public class AI {
             case EASY:
                 return random(board, playerId);
             case MEDIUM:
-                return null;
+                Piece toReturn = blockOrWin(board, playerId);
+                if (toReturn != null) return toReturn;
+                return random(board, playerId);
             case DIFFICULT:
                 return null;
             default:
@@ -43,6 +46,42 @@ public class AI {
             }
         }
         // This line should not be executed
-        return new Piece(-1, -1, -1, -1);
+        return null;
+    }
+
+    private static Piece blockOrWin(Board board, int playerId){
+
+        Piece target = null;
+        Piece[][][] pieces = board.getPieces();
+
+        for (List<int[]> pattern : board.getPossibleWinPattern()){
+            int id = -1;
+            boolean change = false, oneEmpty = false, fail = false;
+            for (int[] index : pattern) {
+                Piece piece = pieces[index[0]][index[1]][index[2]];
+                if (piece == null){
+                    // There are at least two empty cells in this pattern
+                    if (oneEmpty){
+                        fail = true;
+                        break;
+                    }
+                    oneEmpty = true;
+                    target = new Piece(playerId, index[0], index[1], index[2]);
+                }
+                else if (id != piece.getId()) {
+                    // There are at least two players' pieces in this pattern
+                    if (change){
+                        fail = true;
+                        break;
+                    }
+                    change = true;
+                    id = piece.getId();
+                }
+            }
+            if (!fail) break;
+            else target = null;
+        }
+
+        return target;
     }
 }

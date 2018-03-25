@@ -30,15 +30,6 @@ public class SingleGameModel extends GameModel {
     @Override
     public boolean hasRightToStartGame() { return true; }
 
-    private void AIPlacePieces(){
-        // while it's not the turn of human player and nobody has won
-        // we must check isGameOver() first
-        // because if it's over, curPlayer will be set to null
-        while (!board.isGameOver() && !curPlayer.equals(myPlayerId)){
-            placePiece(AI.choosePos(board, curPlayer, setting.getLevel()));
-        }
-    }
-
     @Override
     public Boolean placePiece(Piece piece){
         if (super.placePiece(piece)){
@@ -49,5 +40,14 @@ public class SingleGameModel extends GameModel {
             return true;
         }
         return false;
+    }
+
+    private void AIPlacePieces(){
+        // while it's not the turn of human player and nobody has won
+        // we must check isGameOver() first
+        // because if it's over, curPlayer will be set to null
+        while (!board.isGameOver() && !curPlayer.equals(myPlayerId)){
+            super.placePiece(AI.choosePos(board, curPlayer, setting.getLevel()));
+        }
     }
 }

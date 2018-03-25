@@ -1,5 +1,9 @@
 package cs446.cs.uw.tictacwoah.models;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import cs446.cs.uw.tictacwoah.views.piece.PieceView;
 
 public class Board {
@@ -10,13 +14,15 @@ public class Board {
     // Each number refers to size of the piece
     // first three elements mean same size,
     // fourth means ascending, and fifth means descending
-    private static final Integer[][] ps = {
+    private static final int[][] ps = {
             { 0, 0, 0 },
             { 1, 1, 1 },
             { 2, 2, 2 },
             { 0, 1, 2 },
             { 2, 1, 0 }
     };
+
+    private final List<List<int[]>> possibleWinPattern;
 
     // first dimension indicates size of piece
     // second dimension indicates row index
@@ -30,6 +36,8 @@ public class Board {
     // constructor
     public Board() {
         reset();
+        possibleWinPattern = new ArrayList<>();
+        populatePossibleWinPatterns();
     }
 
     public void reset(){
@@ -38,7 +46,8 @@ public class Board {
         this.winningPattern = null;
     }
 
-    public Piece[][][] getPieces() { return pieces; }
+    Piece[][][] getPieces() { return pieces; }
+    List<List<int[]>> getPossibleWinPattern() { return possibleWinPattern; }
     public Piece getLastPlacedPiece(){
         return lastPlacedPiece;
     }
@@ -49,8 +58,27 @@ public class Board {
         return winningPattern != null;
     }
 
+    public PossibleWinPatternsIter getPossibleWinPattensIter(){
+        return new PossibleWinPatternsIter();
+    }
+
+    final class PossibleWinPatternsIter {
+        int cursor = 0;
+        public boolean hasnext(){
+            return cursor < possibleWinPattern.size();
+        }
+        public List<Piece> next(){
+            List<Piece> toReturn = new LinkedList<>();
+            for (int[] index : possibleWinPattern.get(cursor)){
+                toReturn.add(pieces[index[0]][index[1]][index[2]]);
+            }
+            ++cursor;
+            return toReturn;
+        }
+    }
+
     // for AI to generate random number
-    public Integer getNumEmptyCells(){
+    Integer getNumEmptyCells(){
         Integer emptyCells = 0;
         for (int i = 0; i < pieces.length; ++i){
             for (int j = 0; j < pieces[i].length; ++j){
@@ -65,7 +93,7 @@ public class Board {
     // This function returns false if the desired position has been occupied,
     // returns true if the placement is successful
     public boolean placePiece(Piece piece){
-        Integer pieceSize = piece.getSizeId(), i = piece.getRowId(), j = piece.getColId();
+        int pieceSize = piece.getSizeId(), i = piece.getRowId(), j = piece.getColId();
 
         if (this.pieces[pieceSize][i][j] != null) return false;
 
@@ -77,10 +105,73 @@ public class Board {
         return true;
     }
 
+    private void populatePossibleWinPatterns(){
+        for (int i = 0; i < SIZE; ++i){
+            for (int j = 0; j < SIZE; ++j){
+                List<int[]> pattern = new ArrayList<>();
+                for (int k = 0; k < PieceView.SIZES.length; ++k){
+                    int[] tmp = {k, i, j};
+                    pattern.add(tmp);
+                }
+                possibleWinPattern.add(pattern);
+            }
+        }
+
+        for (int[] p : ps){
+            for (int i = 0; i < SIZE; ++i){
+                // horizontal
+                List<int[]> pattern = new ArrayList<>();
+                for (int j = 0; j < SIZE; ++j) {
+                    int[] tmp = {p[j], i, j};
+                    pattern.add(tmp);
+                }
+                possibleWinPattern.add(pattern);
+
+                // vertical
+                pattern = new ArrayList<>();
+                for (int j = 0; j < SIZE; ++j) {
+                    int[] tmp = {p[j], j, i};
+                    pattern.add(tmp);
+                }
+                possibleWinPattern.add(pattern);
+            }
+
+            // upper left to lower right diagonal
+            List<int[]> pattern1 = new ArrayList<>();
+            // upper right to lower left diagonal
+            List<int[]> pattern2 = new ArrayList<>();
+            for (int i = 0; i < SIZE; ++i){
+                int[] tmp1 = {p[i], i, i};
+                pattern1.add(tmp1);
+                int[] tmp2 = {p[i], i, SIZE - i - 1};
+                pattern2.add(tmp2);
+            }
+            possibleWinPattern.add(pattern1);
+            possibleWinPattern.add(pattern2);
+        }
+    }
+
     // Check if a player has won after they have played
     private boolean checkWon(Piece piece, Integer pieceSize, Integer i, Integer j) {
-        if (samePosToWin() || lineToWin()) return true;
+        for (List<int[]> pattern : possibleWinPattern){
+            if (checkAndSetWinPattern(
+                    pieces[pattern.get(0)[0]][pattern.get(0)[1]][pattern.get(0)[2]],
+                    pieces[pattern.get(1)[0]][pattern.get(1)[1]][pattern.get(1)[2]],
+                    pieces[pattern.get(2)[0]][pattern.get(2)[1]][pattern.get(2)[2]]
+                    )){
+                return true;
+            }
+        }
+        PossibleWinPatternsIter iter = getPossibleWinPattensIter();
+        while (iter.hasnext()){
+            List<Piece> pattern = iter.next();
+            if (checkAndSetWinPattern(pattern.get(0), pattern.get(1), pattern.get(2))){
+                return true;
+            }
+        }
         return false;
+//        if (samePosToWin() || lineToWin()) return true;
+//        return false;
     }
 
     private Boolean samePosToWin(){

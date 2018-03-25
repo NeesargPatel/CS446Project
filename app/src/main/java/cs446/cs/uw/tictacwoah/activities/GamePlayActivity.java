@@ -425,8 +425,8 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         }
     }
 
-    public void showWinOrLoseMessage(Integer winnerId){
-        String msg = "";
+    private void showWinOrLoseMessage(Integer winnerId){
+        String msg;
         if (model instanceof HotseatGameModel)
             msg = "Player " + Integer.toString(winnerId + 1) + " wins! ";
         else
