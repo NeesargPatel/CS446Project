@@ -4,6 +4,8 @@ import java.util.Random;
 
 public class AI {
 
+    private static int[] scores = { 10000, 100, 1, 0 };
+
     public enum LEVEL{
         EASY,
         MEDIUM,
@@ -12,17 +14,14 @@ public class AI {
 
     // for now randomly choose an empty cell
     public static Piece choosePos(Board board, Integer playerId, LEVEL level){
-        switch (level){
-            case EASY:
-                return random(board, playerId);
-            case MEDIUM:
-                Piece toReturn = blockOrWin(board, playerId);
-                if (toReturn != null) return toReturn;
-                return random(board, playerId);
-            case DIFFICULT:
-                return null;
-            default:
-                return null;
+        if (level.equals(LEVEL.EASY)) return random(board, playerId);
+        else {
+            Piece toReturn = blockOrWin(board, playerId);
+            if (toReturn != null) return toReturn;
+
+            if (level.equals(LEVEL.MEDIUM)) return random(board, playerId);
+            else if (level.equals(LEVEL.DIFFICULT)) return decideBasedOnScores(board, playerId);
+            else return null;
         }
     }
 
@@ -51,7 +50,7 @@ public class AI {
 
     private static Piece blockOrWin(Board board, int playerId){
 
-        Piece target = null;
+        Piece target = null, block = null, win = null;
         Piece[][][] pieces = board.getPieces();
 
         for (List<int[]> pattern : board.getPossibleWinPattern()){
@@ -78,10 +77,56 @@ public class AI {
                     id = piece.getId();
                 }
             }
-            if (!fail) break;
-            else target = null;
+            if (!fail) {
+                if (id == playerId){
+                    win = target;
+                    break;
+                }
+                else block = target;
+            }
         }
+        if (win != null) return win;
+        return block;
+    }
 
-        return target;
+    private static Piece decideBasedOnScores(Board board, int playerId){
+        Piece decision = null;
+        int maxScore = -1, curScore;
+        Piece[][][] pieces = board.getPieces();
+        for (int i = 0; i < pieces.length; ++i){
+            for (int j = 0; j < pieces[i].length; ++j){
+                for (int k = 0; k < pieces[i][j].length; ++k){
+                    if (pieces[i][j][k] == null){
+                        pieces[i][j][k] = new Piece(playerId, i, j, k);
+                        curScore = calculateScore(board, playerId);
+                        if (curScore > maxScore){
+                            maxScore = curScore;
+                            decision = pieces[i][j][k];
+                        }
+                        pieces[i][j][k] = null;
+                    }
+                }
+            }
+        }
+        return decision;
+    }
+
+    private static int calculateScore(Board board, int playerId){
+        int score = 0;
+        Piece[][][] pieces = board.getPieces();
+        for (List<int[]> pattern : board.getPossibleWinPattern()){
+            int numEmptyCells = 0;
+            boolean fail = false;
+            for (int[] index : pattern){
+                Piece piece = pieces[index[0]][index[1]][index[2]];
+                if (piece == null) ++numEmptyCells;
+                else if (playerId != piece.getId()){
+                    fail = true;
+                    break;
+                }
+            }
+            if (!fail) score += scores[numEmptyCells];
+        }
+        return score;
     }
 }
