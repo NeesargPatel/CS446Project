@@ -18,9 +18,9 @@ public class PieceView extends View{
     public static final int[] SIZES = new int[] { 90, 160, 230 };
     public static final int[] COLORS = new int[] {
         0xFF85C1E9,  // light blue
-        0xFF82E0AA,  // light green
-        0xFFE59866,  // light orange
-        0xFFEC7063  // light red
+        0xFF45B39D,  // green
+        0xFFDC7633,  // red
+        0xFF7B3F00   // chocolate
     };
     public enum SHAPE{
         RECTANGLE,

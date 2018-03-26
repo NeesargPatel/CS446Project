@@ -179,7 +179,8 @@ public class GamePlayActivity extends AppCompatActivity implements Observer{
         defaultFileName += "/cachedAudioForSending.3gp";
 
         // Request permissions for audio recording
-        ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
+        if (model instanceof ServerGameModel || model instanceof ClientGameModel)
+            ActivityCompat.requestPermissions(this, permissions, REQUEST_RECORD_AUDIO_PERMISSION);
         RelativeLayout.LayoutParams recordButtonLayout = new RelativeLayout.LayoutParams(
                 RelativeLayout.LayoutParams.WRAP_CONTENT,
                 RelativeLayout.LayoutParams.WRAP_CONTENT

@@ -3,6 +3,7 @@ package cs446.cs.uw.tictacwoah.activities;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,8 +58,12 @@ public class HelpFragment extends Fragment {
         if (num == 0)
             text.setText(R.string.help_text_page1);
         else {
+            text.setText(R.string.help_text_page1);
+            int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED);
+            text.measure(0, heightMeasureSpec);
+            int textHeight = text.getMeasuredHeight();
             float cellWidth = displayWidth / Board.SIZE;
-            BoardView boardView = new BoardView(getActivity(), 500, cellWidth);
+            BoardView boardView = new BoardView(getActivity(), textHeight + 200, cellWidth);
             RelativeLayout.LayoutParams layoutParams = new RelativeLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
