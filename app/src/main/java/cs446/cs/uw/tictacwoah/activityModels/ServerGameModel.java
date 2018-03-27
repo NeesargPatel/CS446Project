@@ -92,18 +92,16 @@ public class ServerGameModel extends MultiPlayerGameModel {
                         Log.d("myTag", "inside instanceof Piece");
                         Piece piece = (Piece) msg.obj;
                         model.placePiece(piece);
-                        // broadcast to all the clients except for the one who placed this piece
-                        for (int i = 0;i < model.bluetoothServices.size(); ++i){
-                            // -1 because piece.getId() == 0 means host
-                            // so bluetoothServices[0] actually means the client with playerID 1
-                            if (i != piece.getId() - 1){
-                                model.bluetoothServices.get(i).write(piece);
-                            }
-                        }
+                        model.broadcast(piece, piece.getId() - 1);
                     } else if (msg.obj instanceof AudioClip){
                         Log.d("myTag", "recieved!");
+                        // broadcast this audio clip to the clients other than the one sending it
+                        model.broadcast(msg.obj, msg.arg1);
+
+                        // play the audio clip
                         AudioClip audioClip = (AudioClip) msg.obj;
                         model.playAudio(audioClip);
+
                         /*
                         //if (msg.obj instanceof AudioClip) {
                         Log.d("myTag", "GREAT");
@@ -185,7 +183,7 @@ public class ServerGameModel extends MultiPlayerGameModel {
     }
 
     public Boolean playAudio(AudioClip audioClip) {
-        broadcast(audioClip);
+//        broadcast(audioClip);
 
         byte[] audioFile = audioClip.getAudioClip();
         try {
@@ -219,6 +217,17 @@ public class ServerGameModel extends MultiPlayerGameModel {
         // broadcast to all the clients
         for (BluetoothService bluetoothService : bluetoothServices){
             bluetoothService.write(o);
+        }
+    }
+
+    private void broadcast(Object o, int exceptThisClient){
+        // broadcast to all the clients except for the one who placed this piece
+        for (int i = 0;i < bluetoothServices.size(); ++i){
+            // -1 because piece.getId() == 0 means host
+            // so bluetoothServices[0] actually means the client with playerID 1
+            if (i != exceptThisClient){
+                bluetoothServices.get(i).write(o);
+            }
         }
     }
 }
