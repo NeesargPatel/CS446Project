@@ -67,13 +67,16 @@ public class ClientGameModel extends MultiPlayerGameModel {
 
                                 // notify the LobbyActivity to start GameActivity
                                 if (model.setting != null) model.setChangedAndNotify();
+                                break;
                             }
                             case UPDATE:{
                                 model.setNumPlayers(gameMessage.getNumPlayer());
+                                break;
                             }
                             case START_GAME:{
                                 assert model.isGameOver();
                                 model.newGame();
+                                break;
                             }
                         }
                     }
